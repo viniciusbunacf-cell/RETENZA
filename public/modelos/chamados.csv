@@ -1,0 +1,5 @@
+id_chamado;id_cliente;categoria;assunto;data_abertura;data_fechamento;reaberturas;nota_satisfacao
+CH-5001;10001;Suporte técnico;Sem conexão;02/06/2026 09:15;02/06/2026 16:40;0;4
+CH-5002;10001;Suporte técnico;Internet lenta à noite;10/06/2026 20:05;;1;
+CH-5003;10002;Reclamação;Problema recorrente não resolvido;12/05/2026 11:30;13/05/2026 10:00;0;1
+CH-5004;10002;Cancelamento;Cliente informou intenção de cancelar;15/05/2026 14:20;15/05/2026 15:00;0;
