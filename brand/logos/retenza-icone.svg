@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="RETENZA"><rect width="64" height="64" rx="14" fill="#1B66D6"/>
+    <path d="M19 52V14h15a11 11 0 0 1 0 22H19" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M31 37l13 13" fill="none" stroke="#3CCB8B" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="46" cy="51" r="7.5" fill="#3CCB8B"/></svg>
