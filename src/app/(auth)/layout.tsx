@@ -1,4 +1,5 @@
 import { Activity, ListChecks, Search } from "lucide-react";
+import { NetworkGraphic } from "@/components/brand";
 import { Logo } from "@/components/ui";
 
 const PILLARS = [
@@ -10,10 +11,11 @@ const PILLARS = [
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
-      <aside className="hidden flex-col justify-between bg-ink px-12 py-10 lg:flex">
-        <Logo light />
-        <div>
-          <p className="text-sm font-medium tracking-[0.14em] text-[#5fd3c7] uppercase">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-ink px-12 py-10 lg:flex">
+        <NetworkGraphic className="pointer-events-none absolute -top-6 -right-24 w-[440px] opacity-90" />
+        <Logo light className="relative" />
+        <div className="relative">
+          <p className="text-sm font-medium tracking-[0.14em] text-brand-light uppercase">
             Inteligência operacional de retenção
           </p>
           <h1 className="mt-4 max-w-lg text-4xl leading-tight font-semibold text-white">
@@ -25,7 +27,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <ul className="mt-10 space-y-5">
             {PILLARS.map((p) => (
               <li key={p.title} className="flex gap-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[#5fd3c7]">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-brand-light">
                   <p.icon size={20} aria-hidden="true" />
                 </span>
                 <span>
@@ -36,7 +38,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             ))}
           </ul>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="relative text-xs text-slate-400">
           O score apoia a decisão da equipe. Ele nunca bloqueia, penaliza ou contata clientes automaticamente.
         </p>
       </aside>

@@ -37,7 +37,7 @@ export function FormMessage({ state }: { state: FormState }) {
   }
   if (state.ok) {
     return (
-      <p role="status" className="rounded-lg border border-low/30 bg-low-soft px-3 py-2 text-sm text-low-ink">
+      <p role="status" className="rounded-lg border border-keep/30 bg-keep-soft px-3 py-2 text-sm text-keep">
         {state.ok}
       </p>
     );

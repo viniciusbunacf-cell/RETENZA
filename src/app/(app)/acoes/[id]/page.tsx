@@ -80,8 +80,8 @@ export default async function ActionPage({ params }: { params: Promise<{ id: str
                 <p className="mt-1 text-sm text-text">{action.recommendation}</p>
               </div>
               {action.status === "done" && action.resolution ? (
-                <div className="rounded-lg border border-low/30 bg-low-soft px-4 py-3">
-                  <p className="text-xs font-semibold tracking-wide text-low-ink uppercase">
+                <div className="rounded-lg border border-keep/30 bg-keep-soft px-4 py-3">
+                  <p className="text-xs font-semibold tracking-wide text-keep uppercase">
                     Solução registrada · {OUTCOME[action.outcome ?? ""] ?? "Concluída"}
                   </p>
                   <p className="mt-1 text-sm text-text">{action.resolution}</p>
@@ -199,7 +199,7 @@ export default async function ActionPage({ params }: { params: Promise<{ id: str
                                 <span
                                   className={cn(
                                     "inline-flex items-center gap-1 font-medium tabular-nums",
-                                    delta < 0 ? "text-low-ink" : delta > 0 ? "text-critical-ink" : "text-text-soft",
+                                    delta < 0 ? "text-keep" : delta > 0 ? "text-critical-ink" : "text-text-soft",
                                   )}
                                 >
                                   {delta < 0 ? <ArrowDownRight size={14} aria-hidden="true" /> : delta > 0 ? <ArrowUpRight size={14} aria-hidden="true" /> : <Minus size={14} aria-hidden="true" />}
@@ -272,7 +272,7 @@ export default async function ActionPage({ params }: { params: Promise<{ id: str
                   <span
                     className={cn(
                       "z-10 mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full",
-                      e.type === "completed" ? "bg-low" : e.type === "cancelled" ? "bg-text-muted" : "bg-brand",
+                      e.type === "completed" ? "bg-keep-vivid" : e.type === "cancelled" ? "bg-text-muted" : "bg-brand",
                     )}
                     aria-hidden="true"
                   />

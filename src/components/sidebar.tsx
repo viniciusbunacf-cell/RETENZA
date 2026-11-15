@@ -63,7 +63,7 @@ export function Sidebar({
               active ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white",
             )}
           >
-            <item.icon size={18} aria-hidden="true" className={active ? "text-[#5fd3c7]" : ""} />
+            <item.icon size={18} aria-hidden="true" className={active ? "text-brand-light" : ""} />
             <span className="flex-1">{item.label}</span>
             {item.href === "/acoes" && openActions > 0 ? (
               <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold text-white tabular-nums">

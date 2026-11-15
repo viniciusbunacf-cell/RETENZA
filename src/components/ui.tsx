@@ -8,22 +8,7 @@ export function cn(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
 }
 
-export function Logo({ light = false, className }: { light?: boolean; className?: string }) {
-  return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-        <rect width="28" height="28" rx="7" fill="#0d8f84" />
-        <path
-          d="M8 20V8h6.2a3.9 3.9 0 0 1 1.5 7.5L19.5 20h-3.2l-3.2-4H10.8v4H8Zm2.8-6.4h3.1a1.5 1.5 0 0 0 0-3h-3.1v3Z"
-          fill="#fff"
-        />
-      </svg>
-      <span className={cn("text-[17px] font-semibold tracking-[0.14em]", light ? "text-white" : "text-ink")}>
-        RETENZA
-      </span>
-    </span>
-  );
-}
+export { Logo } from "./brand";
 
 export function PageHeader({
   title,
@@ -88,12 +73,12 @@ export function StatTile({
       : tone === "warning"
         ? "border-l-high"
         : tone === "good"
-          ? "border-l-low"
+          ? "border-l-keep-vivid"
           : "border-l-line-strong";
   const body = (
     <div className={cn("card h-full border-l-4 px-4 py-3.5", accent, href && "transition-shadow hover:shadow-sm")}>
       <p className="text-sm text-text-soft">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight text-text">{value}</p>
+      <p className="mt-1 font-display text-2xl font-semibold tracking-tight text-text">{value}</p>
       {hint ? <p className="mt-1 text-xs text-text-muted">{hint}</p> : null}
     </div>
   );
@@ -153,8 +138,8 @@ export function GroupTag({ group }: { group: SignalGroup | string | null | undef
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "Pendente", cls: "bg-moderate-soft text-moderate-ink" },
-  in_progress: { label: "Em andamento", cls: "bg-[#e3eefb] text-[#174a86]" },
-  done: { label: "Concluída", cls: "bg-low-soft text-low-ink" },
+  in_progress: { label: "Em andamento", cls: "bg-brand-soft text-brand-strong" },
+  done: { label: "Concluída", cls: "bg-keep-soft text-keep" },
   cancelled: { label: "Cancelada", cls: "bg-page text-text-soft" },
 };
 

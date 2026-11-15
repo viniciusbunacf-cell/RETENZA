@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { figtree, sora } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,12 +11,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0b1220",
+  themeColor: "#141b26",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className="h-full">
+    <html lang="pt-BR" className={`${sora.variable} ${figtree.variable} h-full`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

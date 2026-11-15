@@ -14,9 +14,9 @@ import {
   YAxis,
 } from "recharts";
 
-const INK = "#101828";
-const MUTED = "#6b7686";
-const GRID = "#e3e7ed";
+const INK = "#141b26";
+const MUTED = "#5f6b7c";
+const GRID = "#d9dee6";
 const AXIS = "#cfd5de";
 const SERIES_1 = "#2a78d6";
 const SERIES_2 = "#eb6834";

@@ -1,4 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="RETENZA">
-    <path d="M19 52V14h15a11 11 0 0 1 0 22H19" fill="none" stroke="#1B66D6" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M31 37l13 13" fill="none" stroke="#17A36B" stroke-width="9" stroke-linecap="round"/>
-    <circle cx="46" cy="51" r="7.5" fill="#17A36B"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="RETENZA"><path d="M34 34l11 17" fill="none" stroke="#17A36B" stroke-width="5" stroke-linecap="round"/><path d="M18 50V14h18l8 10-8 10H18" fill="none" stroke="#1B66D6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><g fill="#1B66D6"><circle cx="18" cy="14" r="6"/><circle cx="18" cy="50" r="6"/><circle cx="36" cy="14" r="5"/><circle cx="44" cy="24" r="5"/><circle cx="34" cy="34" r="5"/></g><circle cx="45" cy="51" r="7" fill="#17A36B"/></svg>

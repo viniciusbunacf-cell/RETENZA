@@ -188,7 +188,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm text-text-soft">Score de risco</p>
-                <p className="text-4xl font-semibold tracking-tight text-text tabular-nums">{customer.riskScore}</p>
+                <p className="font-display text-4xl font-semibold tracking-tight text-text tabular-nums">{customer.riskScore}</p>
               </div>
               <RiskBadge band={band} />
             </div>

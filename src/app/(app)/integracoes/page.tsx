@@ -100,7 +100,7 @@ export default async function IntegrationsPage({
 
       <h2 className="mt-8 mb-3 flex items-center gap-2 text-base font-semibold text-text">
         Importação por CSV
-        <span className="inline-flex items-center gap-1 rounded-full bg-low-soft px-2 py-0.5 text-xs font-semibold text-low-ink">
+        <span className="inline-flex items-center gap-1 rounded-full bg-keep-soft px-2 py-0.5 text-xs font-semibold text-keep">
           <CircleCheck size={12} aria-hidden="true" /> Disponível
         </span>
       </h2>

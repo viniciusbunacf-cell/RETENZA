@@ -122,7 +122,7 @@ export default async function SettingsPage() {
                     <span
                       className={
                         u.active
-                          ? "rounded-full bg-low-soft px-2.5 py-1 text-xs font-semibold text-low-ink"
+                          ? "rounded-full bg-keep-soft px-2.5 py-1 text-xs font-semibold text-keep"
                           : "rounded-full bg-page px-2.5 py-1 text-xs font-semibold text-text-soft"
                       }
                     >

@@ -120,6 +120,13 @@ Defina `DATABASE_URL` e `SESSION_SECRET` (ver `.env.example`). As migrações de
 
 O build de produção e todos os fluxos foram testados localmente contra PostgreSQL 16 e contra o banco embarcado. A publicação em Vercel + Supabase ainda não foi exercitada.
 
+## Identidade visual
+
+- **Logotipo:** símbolo Rede (um R montado com nós e elos, com a perna verde terminando no nó do cliente) e o nome em Sora Bold. Os arquivos oficiais ficam em `brand/logos/`; `brand/estudos/` guarda os símbolos avaliados e não adotados.
+- **Cores:** azul-sinal `#1B66D6` (ações, links, foco), verde-laço `#0B7A50` (resultado positivo de retenção) e grafite `#141B26` (barra lateral). As cores de risco são usadas só como estado. Os tokens estão no bloco `@theme` de `src/app/globals.css`.
+- **Tipografia:** Sora em títulos e números de destaque, Figtree em texto e interface. Os arquivos ficam em `src/fonts/` (licença SIL Open Font License 1.1) e são carregados em `src/app/fonts.ts`.
+- **Componentes de marca:** `src/components/brand.tsx` (logotipo e grafismo de rede de nós).
+
 ## Segurança e LGPD
 
 - **Isolamento por provedor.** Toda tabela operacional tem `provider_id` e toda consulta parte do provedor da sessão, nunca de um parâmetro enviado pelo navegador.

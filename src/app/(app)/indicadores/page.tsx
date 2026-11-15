@@ -115,12 +115,12 @@ export default async function IndicatorsPage() {
         />
         <div className="grid grid-cols-1 gap-px bg-line md:grid-cols-2">
           {[
-            { title: "Receberam intervenção concluída", grp: impact.treated, accent: "text-low-ink" },
+            { title: "Receberam intervenção concluída", grp: impact.treated, accent: "text-keep" },
             { title: "Não receberam nenhuma ação", grp: impact.comparison, accent: "text-text" },
           ].map(({ title, grp, accent }) => (
             <div key={title} className="bg-white px-5 py-5">
               <p className="text-sm font-semibold text-text">{title}</p>
-              <p className={`mt-2 text-3xl font-semibold tracking-tight tabular-nums ${accent}`}>
+              <p className={`mt-2 font-display text-3xl font-semibold tracking-tight tabular-nums ${accent}`}>
                 {grp.customers ? formatPct(grp.churnRate) : "—"}
               </p>
               <p className="text-sm text-text-soft">cancelaram voluntariamente em {FOLLOW_UP_DAYS} dias</p>
@@ -258,7 +258,7 @@ export default async function IndicatorsPage() {
             <div className="grid grid-cols-1 gap-px bg-line sm:grid-cols-3">
               <div className="bg-white px-5 py-4">
                 <p className="text-sm text-text-soft">Cancelamentos antecipados</p>
-                <p className="mt-1 text-3xl font-semibold tracking-tight text-text tabular-nums">
+                <p className="mt-1 font-display text-3xl font-semibold tracking-tight text-text tabular-nums">
                   {formatPct(validation.recall, 0)}
                 </p>
                 <p className="mt-1 text-xs text-text-muted">
@@ -269,7 +269,7 @@ export default async function IndicatorsPage() {
               </div>
               <div className="bg-white px-5 py-4">
                 <p className="text-sm text-text-soft">Concentração de risco (lift)</p>
-                <p className="mt-1 text-3xl font-semibold tracking-tight text-text tabular-nums">
+                <p className="mt-1 font-display text-3xl font-semibold tracking-tight text-text tabular-nums">
                   {validation.lift === null ? "—" : `${validation.lift.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}×`}
                 </p>
                 <p className="mt-1 text-xs text-text-muted">
@@ -279,7 +279,7 @@ export default async function IndicatorsPage() {
               </div>
               <div className="bg-white px-5 py-4">
                 <p className="text-sm text-text-soft">Volume de alertas</p>
-                <p className="mt-1 text-3xl font-semibold tracking-tight text-text tabular-nums">
+                <p className="mt-1 font-display text-3xl font-semibold tracking-tight text-text tabular-nums">
                   {formatPct(validation.priorityShare)}
                 </p>
                 <p className="mt-1 text-xs text-text-muted">
