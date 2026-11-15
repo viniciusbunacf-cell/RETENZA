@@ -122,7 +122,7 @@ O build de produção e todos os fluxos foram testados localmente contra Postgre
 
 ## Identidade visual
 
-- **Logotipo:** símbolo Rede (um R montado com nós e elos, com a perna verde terminando no nó do cliente) e o nome em Sora Bold. Os arquivos oficiais ficam em `brand/logos/`; `brand/estudos/` guarda os símbolos avaliados e não adotados.
+- **Logotipo:** símbolo Ciclo (dois arcos em volta de um ponto: o azul detecta, o verde retém e o ponto âmbar é o cliente) e o nome em Sora Bold. Os arquivos oficiais ficam em `brand/logos/`; `brand/estudos/` guarda os símbolos avaliados e não adotados.
 - **Cores:** azul-sinal `#1B66D6` (ações, links, foco), verde-laço `#0B7A50` (resultado positivo de retenção) e grafite `#141B26` (barra lateral). As cores de risco são usadas só como estado. Os tokens estão no bloco `@theme` de `src/app/globals.css`.
 - **Tipografia:** Sora em títulos e números de destaque, Figtree em texto e interface. Os arquivos ficam em `src/fonts/` (licença SIL Open Font License 1.1) e são carregados em `src/app/fonts.ts`.
 - **Componentes de marca:** `src/components/brand.tsx` (logotipo e grafismo de rede de nós).

@@ -1,5 +1,5 @@
 /**
- * Elementos da identidade visual do RETENZA: logotipo (símbolo Rede + nome)
+ * Elementos da identidade visual do RETENZA: logotipo (símbolo Ciclo + nome)
  * e o grafismo de rede de nós. Os arquivos oficiais ficam em /brand.
  */
 
@@ -7,35 +7,15 @@ function cn(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
 }
 
-/** Símbolo Rede: um R montado com nós e elos; a perna verde termina no nó do cliente. */
+/** Símbolo Ciclo: dois arcos em volta de um ponto. O azul detecta, o verde retém e o ponto é o cliente. */
 export function BrandSymbol({ light = false, size = 30 }: { light?: boolean; size?: number }) {
   const blue = light ? "#6AA6F5" : "#1B66D6";
   const green = light ? "#3CCB8B" : "#17A36B";
   return (
-    <svg
-      width={(size * 44) / 54}
-      height={size}
-      viewBox="10 6 44 54"
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <path d="M34 34l11 17" fill="none" stroke={green} strokeWidth="5" strokeLinecap="round" />
-      <path
-        d="M18 50V14h18l8 10-8 10H18"
-        fill="none"
-        stroke={blue}
-        strokeWidth="5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <g fill={blue}>
-        <circle cx="18" cy="14" r="6" />
-        <circle cx="18" cy="50" r="6" />
-        <circle cx="36" cy="14" r="5" />
-        <circle cx="44" cy="24" r="5" />
-        <circle cx="34" cy="34" r="5" />
-      </g>
-      <circle cx="45" cy="51" r="7" fill={green} />
+    <svg width={size} height={size} viewBox="6 6 52 52" aria-hidden="true" className="shrink-0">
+      <path d="M12.3 26.7A21 21 0 0 1 50.2 21.5" fill="none" stroke={blue} strokeWidth="9" strokeLinecap="round" />
+      <path d="M51.7 37.3A21 21 0 0 1 13.8 42.5" fill="none" stroke={green} strokeWidth="9" strokeLinecap="round" />
+      <circle cx="32" cy="32" r="7" fill="#F2B33D" />
     </svg>
   );
 }
@@ -43,7 +23,7 @@ export function BrandSymbol({ light = false, size = 30 }: { light?: boolean; siz
 /** Logotipo horizontal. `light` é a versão negativa, para fundo grafite. */
 export function Logo({ light = false, className }: { light?: boolean; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
+    <span className={cn("inline-flex items-center gap-2", className)}>
       <BrandSymbol light={light} />
       <span
         className={cn(
