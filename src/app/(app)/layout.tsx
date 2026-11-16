@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/sidebar";
 import { ROLE_LABELS } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/session";
 import { getActionCounts } from "@/lib/metrics/dashboard";
+import { isPlatformAdmin } from "@/lib/leads/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         userName={user.name}
         roleLabel={ROLE_LABELS[user.role]}
         openActions={counts.pending + counts.inProgress}
+        showLeads={isPlatformAdmin(user.email)}
       />
       <div className="lg:pl-64">
         {user.providerIsDemo ? (

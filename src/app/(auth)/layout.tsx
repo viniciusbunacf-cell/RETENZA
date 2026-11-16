@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Activity, ListChecks, Search } from "lucide-react";
 import { NetworkGraphic } from "@/components/brand";
 import { Logo } from "@/components/ui";
@@ -13,7 +14,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-ink px-12 py-10 lg:flex">
         <NetworkGraphic className="pointer-events-none absolute -top-6 -right-24 w-[440px] opacity-90" />
-        <Logo light className="relative" />
+        <Link href="/" aria-label="RETENZA — página inicial" className="relative self-start">
+          <Logo light />
+        </Link>
         <div className="relative">
           <p className="text-sm font-medium tracking-[0.14em] text-brand-light uppercase">
             Inteligência operacional de retenção
@@ -44,9 +47,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </aside>
       <main className="flex items-center justify-center px-5 py-10">
         <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
+          <Link href="/" aria-label="RETENZA — página inicial" className="mb-8 inline-block lg:hidden">
             <Logo />
-          </div>
+          </Link>
           {children}
         </div>
       </main>

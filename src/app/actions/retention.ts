@@ -39,7 +39,7 @@ async function logEvent(user: SessionUser, actionId: string, type: string, note?
 function refresh(actionId: string) {
   revalidatePath("/acoes");
   revalidatePath(`/acoes/${actionId}`);
-  revalidatePath("/");
+  revalidatePath("/painel");
 }
 
 export async function startActionAction(formData: FormData): Promise<void> {

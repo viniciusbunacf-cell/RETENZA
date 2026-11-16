@@ -32,11 +32,23 @@ Outros comandos:
 | `npm run demo:check` | Gera a base fictícia e imprime os números-chave (churn, faixas, validação do score) |
 | `npm run db:generate` | Gera uma nova migração SQL a partir de `src/db/schema.ts` |
 
+## Site de divulgação
+
+A página inicial (`/`) é o site público do RETENZA: proposta, como funciona, diferenciais, segurança, planos, programa de provedores parceiros e o formulário de pedido de demonstração. O painel fica em `/painel`; a política de privacidade em `/privacidade`.
+
+Cada pedido de demonstração:
+
+1. é gravado no banco (tabela `demo_requests`), então nada se perde mesmo que o e-mail falhe;
+2. é enviado por e-mail para `RETENZA_CONTATO_EMAIL` pelo serviço Resend, quando `RESEND_API_KEY` está definida;
+3. pode ser enviado pelo WhatsApp: após o envio, o visitante vê o botão "Enviar pelo WhatsApp", que abre uma conversa com `RETENZA_CONTATO_WHATSAPP` e a mensagem já preenchida com os dados do pedido.
+
+O envio automático para o WhatsApp, sem ação do visitante, exigiria a API oficial do WhatsApp Business e não está implementado. Os e-mails listados em `RETENZA_ADMIN_EMAILS` veem todos os pedidos em `/demonstracoes`. As variáveis estão descritas em `.env.example`.
+
 ## Módulos
 
 | Módulo | Rota | O que entrega |
 |---|---|---|
-| Dashboard executivo | `/` | Assinantes ativos, churn voluntário e involuntário, clientes e receita em risco, regiões com falhas concentradas, ações pendentes e resultado das ações |
+| Dashboard executivo | `/painel` | Assinantes ativos, churn voluntário e involuntário, clientes e receita em risco, regiões com falhas concentradas, ações pendentes e resultado das ações |
 | Radar de risco | `/radar`, `/clientes/[id]` | Classificação de cada cliente (crítico, alto, moderado, baixo) com os fatores, as evidências, a linha do tempo e a ação recomendada |
 | Inteligência geográfica | `/regioes` | Concentração de falhas por bairro e CTO, evolução do risco da região e lista prioritária para a equipe técnica |
 | Central de ações | `/acoes` | Ações preventivas com problema, recomendação, responsável e prazo; registro da solução e histórico da intervenção |

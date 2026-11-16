@@ -26,6 +26,11 @@
   --color-keep-soft: #dff5ea;
   --color-keep-vivid: #17a36b;
 
+  /* Apoio quente da marca: blocos de respiro e grafismos. */
+  --color-sand: #efd9bd;
+  --color-amber: #f2b33d;
+  --color-wood: #c8955a;
+
   /* Faixas de risco: só como estado, sempre com ícone e rótulo. */
   --color-critical: #d03b3b;
   --color-critical-soft: #fdecec;
@@ -47,6 +52,13 @@
 
 html {
   color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {

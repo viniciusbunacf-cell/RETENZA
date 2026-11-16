@@ -304,3 +304,27 @@ export const imports = pgTable(
   },
   (t) => [index("imports_provider_idx").on(t.providerId, t.createdAt)],
 );
+
+/**
+ * Pedidos de demonstração vindos do site público. Não pertencem a nenhum
+ * provedor cliente: são contatos comerciais do próprio RETENZA.
+ */
+export const demoRequests = pgTable(
+  "demo_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    role: text("role"),
+    company: text("company").notNull(),
+    city: text("city"),
+    subscribers: text("subscribers"),
+    erp: text("erp"),
+    email: text("email").notNull(),
+    whatsapp: text("whatsapp").notNull(),
+    message: text("message"),
+    /** Resultado do aviso por e-mail: sent | not_configured | failed */
+    emailStatus: text("email_status").notNull().default("not_configured"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("demo_requests_created_idx").on(t.createdAt)],
+);

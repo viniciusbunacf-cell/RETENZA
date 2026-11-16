@@ -56,7 +56,7 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   attempts.delete(email);
   await createSession(user.id);
   await audit({ providerId: user.providerId, id: user.id, name: user.name }, "Login", "Acesso à plataforma");
-  redirect("/");
+  redirect("/painel");
 }
 
 const signupSchema = z.object({

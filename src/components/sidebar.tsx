@@ -10,6 +10,7 @@ import {
   LogOut,
   MapPinned,
   Menu,
+  Inbox,
   Plug,
   Radar,
   Settings,
@@ -19,7 +20,7 @@ import { logoutAction } from "@/app/actions/auth";
 import { Logo, cn } from "./ui";
 
 const NAV = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/painel", label: "Dashboard", icon: LayoutDashboard },
   { href: "/radar", label: "Radar de risco", icon: Radar },
   { href: "/regioes", label: "Inteligência geográfica", icon: MapPinned },
   { href: "/acoes", label: "Central de ações", icon: ClipboardList },
@@ -29,7 +30,7 @@ const NAV = [
 ];
 
 function isActive(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
+  if (href === "/painel") return pathname === "/painel";
   if (href === "/radar") return pathname.startsWith("/radar") || pathname.startsWith("/clientes");
   return pathname.startsWith(href);
 }
@@ -39,18 +40,20 @@ export function Sidebar({
   userName,
   roleLabel,
   openActions,
+  showLeads = false,
 }: {
   providerName: string;
   userName: string;
   roleLabel: string;
   openActions: number;
+  showLeads?: boolean;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   const nav = (
     <nav className="flex-1 space-y-1 px-3 py-4" aria-label="Navegação principal">
-      {NAV.map((item) => {
+      {[...NAV, ...(showLeads ? [{ href: "/demonstracoes", label: "Pedidos de demonstração", icon: Inbox }] : [])].map((item) => {
         const active = isActive(pathname, item.href);
         return (
           <Link
@@ -97,7 +100,7 @@ export function Sidebar({
     <>
       {/* Barra superior (celular e tablet) */}
       <header className="sticky top-0 z-30 flex items-center justify-between bg-ink px-4 py-3 lg:hidden">
-        <Link href="/" aria-label="RETENZA — início">
+        <Link href="/painel" aria-label="RETENZA — painel">
           <Logo light />
         </Link>
         <button
@@ -120,7 +123,7 @@ export function Sidebar({
       {/* Barra lateral (desktop) */}
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col bg-ink lg:flex">
         <div className="px-5 pt-6 pb-2">
-          <Link href="/" aria-label="RETENZA — início">
+          <Link href="/painel" aria-label="RETENZA — painel">
             <Logo light />
           </Link>
           <p className="mt-1.5 text-[11px] font-medium tracking-[0.12em] text-slate-400 uppercase">
