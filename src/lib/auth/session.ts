@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
 import { cache } from "react";
 import { cookies } from "next/headers";
@@ -32,8 +32,11 @@ function getSecret(): Uint8Array {
     cachedSecret = new TextEncoder().encode(fromEnv);
     return cachedSecret;
   }
-  if (process.env.DATABASE_URL && process.env.NODE_ENV === "production") {
-    throw new Error("Defina SESSION_SECRET (mínimo de 32 caracteres) para executar o RETENZA em produção.");
+  if (process.env.DATABASE_URL) {
+    // Produção sem SESSION_SECRET: chave derivada da conexão do banco, que já é secreta.
+    // Trocar a senha do banco encerra as sessões abertas (todos entram de novo).
+    cachedSecret = createHash("sha256").update("retenza-session-v1|" + process.env.DATABASE_URL).digest();
+    return cachedSecret;
   }
   // Desenvolvimento/demonstração: segredo gerado e guardado localmente.
   const dir = path.join(process.cwd(), ".data");

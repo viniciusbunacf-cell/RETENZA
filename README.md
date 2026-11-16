@@ -126,18 +126,13 @@ src/lib/demo          gerador da base fictícia
 drizzle/              migrações SQL
 ```
 
-### Produção
+### Produção (Vercel + Supabase)
 
-Defina `DATABASE_URL` e `SESSION_SECRET` (ver `.env.example`). As migrações de `drizzle/` são aplicadas na primeira conexão. Com `DATABASE_URL` definido, o modo demonstração fica desligado, a menos que `RETENZA_DEMO=true`.
+1. **Supabase:** crie um projeto na região São Paulo e copie a conexão do tipo *Transaction pooler* (botão **Connect**), trocando `[YOUR-PASSWORD]` pela senha do banco.
+2. **Vercel:** importe o repositório do GitHub e, antes de publicar, defina as variáveis `DATABASE_URL` (a conexão acima) e, se quiser, `RETENZA_DEMO=true` (provedor fictício para demonstrações), `CRON_SECRET` (recálculo diário automático) e as variáveis de contato do site (`.env.example`).
+3. **Publicação:** o script `vercel-build` aplica as migrações do banco e gera o build. O `vercel.json` coloca as funções em São Paulo (`gru1`) e agenda o recálculo diário às 6h de Brasília.
 
-O build de produção e todos os fluxos foram testados localmente contra PostgreSQL 16 e contra o banco embarcado. A publicação em Vercel + Supabase ainda não foi exercitada.
-
-## Identidade visual
-
-- **Logotipo:** símbolo Ciclo (dois arcos em volta de um ponto: o azul detecta, o verde retém e o ponto âmbar é o cliente) e o nome em Sora Bold. Os arquivos oficiais ficam em `brand/logos/`; `brand/estudos/` guarda os símbolos avaliados e não adotados.
-- **Cores:** azul-sinal `#1B66D6` (ações, links, foco), verde-laço `#0B7A50` (resultado positivo de retenção) e grafite `#141B26` (barra lateral). As cores de risco são usadas só como estado. Os tokens estão no bloco `@theme` de `src/app/globals.css`.
-- **Tipografia:** Sora em títulos e números de destaque, Figtree em texto e interface. Os arquivos ficam em `src/fonts/` (licença SIL Open Font License 1.1) e são carregados em `src/app/fonts.ts`.
-- **Componentes de marca:** `src/components/brand.tsx` (logotipo e grafismo de rede de nós).
+Sem `SESSION_SECRET`, a chave das sessões é derivada de `DATABASE_URL`. Limite conhecido: na Vercel, cada envio de arquivo para o servidor aceita até cerca de 4,5 MB; arquivos CSV maiores precisam ser divididos.
 
 ## Segurança e LGPD
 

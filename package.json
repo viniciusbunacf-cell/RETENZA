@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
-    "demo:check": "tsx scripts/demo-check.ts"
+    "demo:check": "tsx scripts/demo-check.ts",
+    "vercel-build": "tsx scripts/migrate.ts && next build",
+    "db:migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.16",

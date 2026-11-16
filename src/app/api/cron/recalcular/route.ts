@@ -18,13 +18,13 @@ function authorized(request: Request): boolean {
 
 /**
  * Recalcula o risco e gera as ações preventivas de todos os provedores.
- * Pensado para um agendador externo (cron da hospedagem, n8n etc.), uma vez por dia:
+ * Na Vercel roda sozinho uma vez por dia (vercel.json); também aceita um agendador externo:
  *
  *   curl -X POST https://seu-dominio/api/cron/recalcular -H "Authorization: Bearer $CRON_SECRET"
  *
  * Fica desativado enquanto CRON_SECRET não estiver definido.
  */
-export async function POST(request: Request): Promise<Response> {
+async function run(request: Request): Promise<Response> {
   if (!authorized(request)) return Response.json({ error: "Não autorizado." }, { status: 401 });
 
   const db = await getDb();
@@ -43,3 +43,7 @@ export async function POST(request: Request): Promise<Response> {
   }
   return Response.json({ ok: true, providers: results });
 }
+
+/** A Vercel chama o agendamento com GET e o cabeçalho Authorization: Bearer CRON_SECRET. */
+export const GET = run;
+export const POST = run;
