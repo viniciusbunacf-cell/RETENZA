@@ -18,7 +18,7 @@ export function CompleteForm({ actionId }: { actionId: string }) {
           required
           minLength={10}
           maxLength={2000}
-          placeholder="Ex.: fusão refeita na CTO, sinal normalizado e clientes avisados."
+          placeholder="Ex.: causa corrigida, serviço normalizado e clientes avisados."
           className="input"
         />
       </div>

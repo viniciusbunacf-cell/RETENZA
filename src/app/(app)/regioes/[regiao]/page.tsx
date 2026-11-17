@@ -19,11 +19,14 @@ import { requireUser } from "@/lib/auth/session";
 import { formatInt, formatMoneyRound, formatPct, formatShortDate } from "@/lib/format";
 import { UNKNOWN_REGION, getCtoStats, getRegionStats } from "@/lib/metrics/regions";
 import type { RiskBand } from "@/lib/risk/types";
+import { cap, segmentOf } from "@/lib/segments";
 
 export const metadata: Metadata = { title: "Região" };
 
 export default async function RegionPage({ params }: { params: Promise<{ regiao: string }> }) {
   const user = await requireUser();
+  const seg = segmentOf(user.segment);
+  const Unit = cap(seg.unit);
   const region = decodeURIComponent((await params).regiao);
   const regions = await getRegionStats(user.providerId);
   const stat = regions.find((r) => r.region === region);
@@ -64,7 +67,7 @@ export default async function RegionPage({ params }: { params: Promise<{ regiao:
       </Link>
       <PageHeader
         title={region}
-        description={`${formatInt(stat.customers)} clientes ativos · ${formatMoneyRound(stat.mrrCents)} de receita mensal`}
+        description={`${cap(seg.region)} · ${formatInt(stat.customers)} ${seg.customers} ativos · ${formatMoneyRound(stat.mrrCents)} de receita mensal`}
         actions={
           stat.openAction ? (
             <Link href={`/acoes/${stat.openAction.id}`} className="btn-primary">
@@ -76,9 +79,8 @@ export default async function RegionPage({ params }: { params: Promise<{ regiao:
 
       {stat.concentration ? (
         <Notice tone="warning" className="mb-4">
-          <strong className="font-semibold">Concentração de falhas detectada.</strong> {stat.affected} clientes (
-          {formatPct(stat.affectedShare, 0)} da base local) apresentam problemas de conexão recorrentes. Antes de
-          abordar clientes um a um, verifique a infraestrutura que atende a região.
+          <strong className="font-semibold">Concentração de falhas detectada.</strong> {stat.affected} {seg.customers} (
+          {formatPct(stat.affectedShare, 0)} da base local) apresentam {seg.incidents} recorrentes. {seg.regionAction}
           {stat.openAction ? (
             <>
               {" "}
@@ -90,13 +92,13 @@ export default async function RegionPage({ params }: { params: Promise<{ regiao:
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
-          label="Clientes com falhas recentes"
+          label={`${cap(seg.customers)} com falhas recentes`}
           value={formatInt(stat.affected)}
-          hint={`${formatPct(stat.affectedShare, 0)} da base da região`}
+          hint={`${formatPct(stat.affectedShare, 0)} da base local`}
           tone={stat.concentration ? "critical" : "default"}
         />
-        <StatTile label="Eventos de rede (30 dias)" value={formatInt(stat.events30d)} hint="Quedas, instabilidades e lentidão" />
-        <StatTile label="Chamados técnicos (30 dias)" value={formatInt(stat.techTickets30d)} />
+        <StatTile label="Falhas no serviço (30 dias)" value={formatInt(stat.events30d)} hint={`${seg.incidentTypes.outage}, ${seg.incidentTypes.instability.toLowerCase()} e ${seg.incidentTypes.slow_speed.toLowerCase()}`} />
+        <StatTile label="Chamados de suporte (30 dias)" value={formatInt(stat.techTickets30d)} />
         <StatTile
           label="Em risco alto ou crítico"
           value={formatInt(stat.atRisk)}
@@ -107,7 +109,7 @@ export default async function RegionPage({ params }: { params: Promise<{ regiao:
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card>
-          <CardHeader title="Evolução do risco da região" description="Score médio dos clientes da região a cada semana." />
+          <CardHeader title="Evolução do risco" description={`Score médio dos ${seg.customers} deste grupo a cada semana.`} />
           <div className="px-3 py-4">
             {stat.trend.length > 1 ? (
               <ScoreLineChart
@@ -126,18 +128,18 @@ export default async function RegionPage({ params }: { params: Promise<{ regiao:
         </Card>
 
         <Card className="overflow-hidden">
-          <CardHeader title="Por CTO" description="Onde, dentro da região, os problemas estão concentrados." />
+          <CardHeader title={`Por ${seg.unit}`} description="Onde, dentro deste grupo, os problemas estão concentrados." />
           {ctos.length === 0 ? (
-            <p className="px-5 py-10 text-center text-sm text-text-muted">CTO não informada para os clientes desta região.</p>
+            <p className="px-5 py-10 text-center text-sm text-text-muted">{Unit} não informado para os clientes deste grupo.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[520px] border-collapse">
                 <thead className="border-b border-line bg-page/60">
                   <tr>
-                    <th className="th">CTO</th>
+                    <th className="th">{Unit}</th>
                     <th className="th text-right">Clientes</th>
                     <th className="th text-right">Com falhas</th>
-                    <th className="th text-right">Eventos</th>
+                    <th className="th text-right">Falhas</th>
                     <th className="th text-right">Em risco</th>
                     <th className="th text-right">Score</th>
                   </tr>
@@ -169,8 +171,8 @@ export default async function RegionPage({ params }: { params: Promise<{ regiao:
 
       <Card className="mt-4 overflow-hidden">
         <CardHeader
-          title="Clientes com maior risco na região"
-          description="Lista prioritária para a equipe (até 30 clientes)."
+          title={`${cap(seg.customers)} com maior risco`}
+          description={`Lista prioritária para a equipe (até 30 ${seg.customers}).`}
           right={
             <Link href={`/radar?regiao=${encodeURIComponent(region)}`} className="link text-sm">
               Ver todos no radar
@@ -178,14 +180,14 @@ export default async function RegionPage({ params }: { params: Promise<{ regiao:
           }
         />
         {affected.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-text-muted">Nenhum cliente com sinais de risco nesta região.</p>
+          <p className="px-5 py-10 text-center text-sm text-text-muted">Nenhum cliente com sinais de risco neste grupo.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] border-collapse">
               <thead className="border-b border-line bg-page/60">
                 <tr>
                   <th className="th">Cliente</th>
-                  <th className="th">CTO</th>
+                  <th className="th">{Unit}</th>
                   <th className="th">Risco</th>
                   <th className="th">Causa predominante</th>
                   <th className="th">Principal fator</th>

@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: { default: "RETENZA — Inteligência operacional de retenção", template: "%s · RETENZA" },
   description:
-    "Identifique o risco de cancelamento, entenda o motivo e aja antes da perda. Plataforma de retenção para provedores de internet.",
+    "Identifique o risco de cancelamento, entenda o motivo e aja antes da perda. Plataforma de retenção de clientes para empresas de qualquer segmento.",
 };
 
 export const viewport: Viewport = {

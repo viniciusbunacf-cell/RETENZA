@@ -50,6 +50,13 @@ describe("normalização", () => {
     expect(normalizeEventType("instabilidade")).toBe("instability");
     expect(normalizeEventType("Lentidão")).toBe("slow_speed");
     expect(normalizeEventType("manutenção")).toBeNull();
+    // termos de outros segmentos
+    expect(normalizeEventType("Aula cancelada")).toBe("outage");
+    expect(normalizeEventType("Indisponibilidade")).toBe("outage");
+    expect(normalizeEventType("Atraso recorrente")).toBe("instability");
+    expect(normalizeEventType("Equipamento parado")).toBe("instability");
+    expect(normalizeEventType("Espera acima do esperado")).toBe("slow_speed");
+    expect(normalizeEventType("Produto com defeito")).toBe("slow_speed");
   });
   it("deduz status e tipo de cancelamento", () => {
     expect(normalizeCustomerStatus("Ativo", false)).toBe("active");
@@ -62,6 +69,11 @@ describe("normalização", () => {
 
 describe("parseCsv", () => {
   it("detecta o separador e mapeia cabeçalhos com acento e sinônimos", () => {
+    const uso = parseCsv("Matrícula;Data Check-in\n10;02/06/2026\n", "usage");
+    expect(uso.missingRequired).toEqual([]);
+    expect(uso.rows[0]).toMatchObject({ customerExternalId: "10", day: "02/06/2026" });
+    const generico = parseCsv("id_cliente;nome;unidade;turma\n10;Maria;Centro;Turma A\n", "customers");
+    expect(generico.rows[0]).toMatchObject({ region: "Centro", cto: "Turma A" });
     const csv = "Código;Nome do Cliente;Bairro;Valor\n10;Maria;Centro;99,90\n";
     const parsed = parseCsv(csv, "customers");
     expect(parsed.missingRequired).toEqual(["nome"]);

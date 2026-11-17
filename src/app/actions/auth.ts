@@ -9,6 +9,7 @@ import { createSession, destroySession } from "@/lib/auth/session";
 import { audit } from "@/lib/audit";
 import { ensureDemoProvider } from "@/lib/demo/seed";
 import { DEFAULT_RISK_CONFIG } from "@/lib/risk/config";
+import { isSegmentId } from "@/lib/segments";
 
 export interface FormState {
   error?: string;
@@ -60,7 +61,8 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
 }
 
 const signupSchema = z.object({
-  providerName: z.string().trim().min(2, "Informe o nome do provedor.").max(120),
+  segment: z.string().refine(isSegmentId, "Selecione o segmento da empresa."),
+  providerName: z.string().trim().min(2, "Informe o nome da empresa.").max(120),
   city: z.string().trim().max(120).optional(),
   erp: z.string().trim().max(60).optional(),
   name: z.string().trim().min(2, "Informe seu nome.").max(120),
@@ -70,6 +72,7 @@ const signupSchema = z.object({
 
 export async function signupAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = signupSchema.safeParse({
+    segment: formData.get("segment") ?? "",
     providerName: formData.get("providerName") ?? "",
     city: formData.get("city") ?? "",
     erp: formData.get("erp") ?? "",
@@ -92,7 +95,7 @@ export async function signupAction(_prev: FormState, formData: FormData): Promis
   const userId = await db.transaction(async (tx) => {
     const [provider] = await tx
       .insert(schema.providers)
-      .values({ name: data.providerName, city: data.city || null, erp: data.erp || null })
+      .values({ name: data.providerName, segment: data.segment, city: data.city || null, erp: data.erp || null })
       .returning({ id: schema.providers.id });
     const [user] = await tx
       .insert(schema.users)
@@ -110,7 +113,7 @@ export async function signupAction(_prev: FormState, formData: FormData): Promis
       providerId: provider.id,
       userId: user.id,
       userName: data.name,
-      action: "Cadastro do provedor",
+      action: "Cadastro da empresa",
       detail: data.providerName,
     });
     return user.id;

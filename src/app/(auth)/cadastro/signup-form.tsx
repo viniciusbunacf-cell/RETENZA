@@ -1,18 +1,45 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { signupAction } from "@/app/actions/auth";
 import { FormMessage, SubmitButton } from "@/components/forms";
+import { SEGMENT_ORDER, SEGMENTS, segmentOf, type SegmentId } from "@/lib/segments";
 
-const ERPS = ["HubSoft", "IXC Provedor", "SGP", "MK Solutions", "Outro / planilhas"];
-
-export function SignupForm() {
+export function SignupForm({ initialSegment }: { initialSegment?: SegmentId }) {
   const [state, action] = useActionState(signupAction, {});
+  const [segment, setSegment] = useState<SegmentId | "">(initialSegment ?? "");
+  const terms = segment ? segmentOf(segment) : null;
   return (
     <form action={action} className="space-y-4">
       <div>
+        <label htmlFor="segment" className="label">
+          Segmento da empresa
+        </label>
+        <select
+          id="segment"
+          name="segment"
+          required
+          className="input"
+          value={segment}
+          onChange={(e) => setSegment(e.target.value as SegmentId)}
+          aria-describedby="segment-hint"
+        >
+          <option value="">Selecione…</option>
+          {SEGMENT_ORDER.map((id) => (
+            <option key={id} value={id}>
+              {SEGMENTS[id].name}
+            </option>
+          ))}
+        </select>
+        <p id="segment-hint" className="mt-1 text-xs text-text-muted">
+          {terms
+            ? `${terms.examples}. A plataforma vai falar em “${terms.customers}” e “${terms.regions}”.`
+            : "Define os termos usados na plataforma. O motor de risco é o mesmo para todos."}
+        </p>
+      </div>
+      <div>
         <label htmlFor="providerName" className="label">
-          Nome do provedor
+          Nome da empresa
         </label>
         <input id="providerName" name="providerName" required maxLength={120} className="input" />
       </div>
@@ -25,16 +52,21 @@ export function SignupForm() {
         </div>
         <div>
           <label htmlFor="erp" className="label">
-            Sistema de gestão (ERP)
+            Sistema de gestão <span className="font-normal text-text-muted">(opcional)</span>
           </label>
-          <select id="erp" name="erp" className="input" defaultValue="">
-            <option value="">Selecione…</option>
-            {ERPS.map((erp) => (
-              <option key={erp} value={erp}>
-                {erp}
-              </option>
+          <input
+            id="erp"
+            name="erp"
+            maxLength={60}
+            list="erp-suggestions"
+            placeholder={terms?.systems[0] ? `Ex.: ${terms.systems[0]}` : "Ex.: planilhas"}
+            className="input"
+          />
+          <datalist id="erp-suggestions">
+            {[...(terms?.systems ?? []), "Planilhas"].map((s) => (
+              <option key={s} value={s} />
             ))}
-          </select>
+          </datalist>
         </div>
       </div>
       <hr className="border-line" />
@@ -70,7 +102,7 @@ export function SignupForm() {
       </div>
       <FormMessage state={state} />
       <SubmitButton className="btn-primary w-full" pendingLabel="Criando conta…">
-        Criar conta do provedor
+        Criar conta da empresa
       </SubmitButton>
     </form>
   );

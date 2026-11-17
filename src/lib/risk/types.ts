@@ -1,10 +1,12 @@
-export type SignalGroup = "service" | "support" | "financial" | "dissatisfaction" | "relationship";
+export type SignalGroup = "service" | "engagement" | "support" | "financial" | "dissatisfaction" | "relationship";
 export type RiskBand = "critical" | "high" | "moderate" | "low";
 
 export type RuleId =
   | "outages_recurring"
   | "downtime_long"
   | "slow_speed"
+  | "usage_drop"
+  | "no_usage"
   | "tickets_volume"
   | "recurring_complaint"
   | "unresolved_ticket"
@@ -78,11 +80,20 @@ export interface InvoiceSignal {
   paidAt: Date | null;
 }
 
+export interface UsageSignal {
+  /** Dia do uso. */
+  day: Date;
+  /** Quantidade no dia: visitas, aulas, acessos, consultas, pedidos. */
+  quantity: number;
+}
+
 export interface CustomerSignals {
   activatedAt: Date | null;
   tickets: TicketSignal[];
   events: NetworkEventSignal[];
   invoices: InvoiceSignal[];
+  /** Uso diário do serviço; vazio quando a empresa não envia esse dado. */
+  usage: UsageSignal[];
   /** Datas de conclusão de ações de retenção anteriores que envolveram o cliente. */
   retentionActionsCompletedAt: Date[];
 }

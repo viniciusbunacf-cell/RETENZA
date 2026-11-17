@@ -7,7 +7,8 @@ export const dynamic = "force-dynamic";
 
 const NAV = [
   { href: "/#como-funciona", label: "Como funciona" },
-  { href: "/#diferenciais", label: "Diferenciais" },
+  { href: "/#segmentos", label: "Segmentos" },
+  { href: "/provedores", label: "Provedores" },
   { href: "/#planos", label: "Planos" },
   { href: "/#piloto", label: "Piloto" },
 ];
@@ -50,7 +51,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           <div>
             <Logo light />
             <p className="mt-3 max-w-xs text-sm text-slate-400">
-              Inteligência operacional de retenção para provedores de internet.
+              Inteligência operacional de retenção de clientes, para empresas de qualquer segmento.
             </p>
           </div>
           <div>
@@ -62,10 +63,27 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 </Link>
               </li>
               <li>
+                <Link href="/#segmentos" className="hover:text-white">
+                  Segmentos
+                </Link>
+              </li>
+              <li>
+                <Link href="/provedores" className="hover:text-white">
+                  Para provedores de internet
+                </Link>
+              </li>
+              <li>
                 <Link href="/#planos" className="hover:text-white">
                   Planos
                 </Link>
               </li>
+              {user ? null : (
+                <li>
+                  <Link href="/cadastro" className="hover:text-white">
+                    Criar conta
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href={user ? "/painel" : "/login"} className="hover:text-white">
                   {user ? "Abrir painel" : "Entrar"}

@@ -61,6 +61,7 @@ export async function recalculateProvider(
       tickets: [],
       events: [],
       invoices: [],
+      usage: [],
       retentionActionsCompletedAt: [],
     });
   }
@@ -107,6 +108,15 @@ export async function recalculateProvider(
       and(eq(schema.invoices.providerId, providerId), gte(schema.invoices.dueDate, new Date(first.getTime() - 200 * DAY))),
     );
   for (const i of invoiceRows) signals.get(i.customerId)?.invoices.push(i);
+
+  const usageFrom = new Date(first.getTime() - (config.recentDays + 95) * DAY).toISOString().slice(0, 10);
+  const usageRows = await db
+    .select({ customerId: schema.usageRecords.customerId, day: schema.usageRecords.day, quantity: schema.usageRecords.quantity })
+    .from(schema.usageRecords)
+    .where(and(eq(schema.usageRecords.providerId, providerId), gte(schema.usageRecords.day, usageFrom)));
+  for (const u of usageRows) {
+    signals.get(u.customerId)?.usage.push({ day: new Date(u.day + "T12:00:00Z"), quantity: u.quantity });
+  }
 
   const pastActions = await db
     .select({ customerId: schema.actionCustomers.customerId, completedAt: schema.actions.completedAt })

@@ -2,13 +2,14 @@ import type { RiskBand, RiskConfig, RuleId, SignalGroup } from "./types";
 
 export const GROUP_LABELS: Record<SignalGroup, string> = {
   service: "Qualidade do serviço",
+  engagement: "Uso e engajamento",
   support: "Atendimento",
   financial: "Financeiro",
   dissatisfaction: "Insatisfação",
   relationship: "Relacionamento",
 };
 
-export const GROUP_ORDER: SignalGroup[] = ["service", "support", "dissatisfaction", "financial", "relationship"];
+export const GROUP_ORDER: SignalGroup[] = ["service", "engagement", "support", "dissatisfaction", "financial", "relationship"];
 
 export const BAND_LABELS: Record<RiskBand, string> = {
   critical: "Crítico",
@@ -39,7 +40,7 @@ export const RULES: RuleMeta[] = [
     id: "outages_recurring",
     group: "service",
     label: "Interrupções recorrentes",
-    description: "Quedas ou instabilidades de conexão repetidas na janela de observação.",
+    description: "Interrupções ou problemas repetidos no serviço (no provedor: quedas e instabilidades) na janela de observação.",
     thresholdLabel: "Nº mínimo de quedas/instabilidades",
   },
   {
@@ -52,16 +53,31 @@ export const RULES: RuleMeta[] = [
   {
     id: "slow_speed",
     group: "service",
-    label: "Velocidade abaixo do esperado",
-    description: "Eventos de lentidão medidos ou reclamações de velocidade (sem contar duas vezes o mesmo incidente).",
+    label: "Qualidade abaixo do esperado",
+    description: "Registros de qualidade abaixo do esperado (no provedor: lentidão medida) ou reclamações de qualidade, sem contar duas vezes o mesmo incidente.",
     thresholdLabel: "Nº mínimo de ocorrências de lentidão",
+  },
+  {
+    id: "usage_drop",
+    group: "engagement",
+    label: "Queda de uso",
+    description:
+      "Uso na janela de observação bem abaixo da média dos 90 dias anteriores: visitas, aulas, acessos, consultas ou pedidos.",
+    thresholdLabel: "Queda mínima em relação à média (%)",
+  },
+  {
+    id: "no_usage",
+    group: "engagement",
+    label: "Sem uso recente",
+    description: "Nenhum uso registrado há vários dias, depois de o cliente ter usado no período anterior.",
+    thresholdLabel: "Dias sem uso",
   },
   {
     id: "tickets_volume",
     group: "support",
     label: "Volume de chamados",
     description:
-      "Chamados abertos na janela, desconsiderando os que pertencem a uma falha de rede já contabilizada.",
+      "Chamados abertos na janela, desconsiderando os que pertencem a uma falha no serviço já contabilizada.",
     thresholdLabel: "Nº mínimo de chamados",
   },
   {
@@ -151,6 +167,8 @@ export const DEFAULT_RISK_CONFIG: RiskConfig = {
     outages_recurring: { enabled: true, points: 25, threshold: 2 },
     downtime_long: { enabled: true, points: 10, threshold: 240 },
     slow_speed: { enabled: true, points: 10, threshold: 2 },
+    usage_drop: { enabled: true, points: 25, threshold: 40 },
+    no_usage: { enabled: true, points: 30, threshold: 21 },
     tickets_volume: { enabled: true, points: 20, threshold: 3 },
     recurring_complaint: { enabled: true, points: 20, threshold: 1 },
     unresolved_ticket: { enabled: true, points: 25, threshold: 5 },
@@ -162,7 +180,7 @@ export const DEFAULT_RISK_CONFIG: RiskConfig = {
     early_tenure: { enabled: true, points: 5, threshold: 6 },
     previous_retention: { enabled: true, points: 10, threshold: 1 },
   },
-  groupCaps: { service: 35, support: 30, financial: 15, dissatisfaction: 40, relationship: 10 },
+  groupCaps: { service: 35, engagement: 35, support: 30, financial: 15, dissatisfaction: 40, relationship: 10 },
   bands: { critical: 80, high: 60, moderate: 30 },
   cluster: { minCustomers: 5, minSharePct: 12 },
 };

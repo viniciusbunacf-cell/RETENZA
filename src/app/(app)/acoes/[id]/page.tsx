@@ -6,6 +6,7 @@ import { assignActionAction, startActionAction } from "@/app/actions/retention";
 import { SubmitButton } from "@/components/forms";
 import { ActionStatusBadge, Card, CardHeader, GroupTag, Notice, PriorityTag, RiskBadge, cn } from "@/components/ui";
 import { requireUser } from "@/lib/auth/session";
+import { cap, segmentOf } from "@/lib/segments";
 import { formatDateTime, formatInt, formatMoneyRound, formatRelative } from "@/lib/format";
 import { getActionDetail } from "@/lib/retention/queries";
 import type { RiskBand } from "@/lib/risk/types";
@@ -29,6 +30,7 @@ const OUTCOME: Record<string, string> = {
 
 export default async function ActionPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
+  const seg = segmentOf(user.segment);
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const action = await getActionDetail(user.providerId, id);
@@ -161,7 +163,7 @@ export default async function ActionPage({ params }: { params: Promise<{ id: str
                     <thead className="sticky top-0 border-b border-line bg-page">
                       <tr>
                         <th className="th">Cliente</th>
-                        <th className="th">CTO</th>
+                        <th className="th">{cap(seg.unit)}</th>
                         <th className="th">Na criação</th>
                         <th className="th">Hoje</th>
                         <th className="th">Variação</th>

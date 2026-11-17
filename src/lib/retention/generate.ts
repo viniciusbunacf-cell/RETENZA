@@ -3,6 +3,7 @@ import { getDb, rowsOf, schema, type Db } from "@/db/client";
 import { getRiskConfig } from "@/lib/risk/recalculate";
 import { priorityForBand, recommendFor } from "@/lib/risk/recommend";
 import type { RiskBand, RiskFactor, SignalGroup } from "@/lib/risk/types";
+import { segmentOf } from "@/lib/segments";
 
 const HOUR = 3_600_000;
 
@@ -32,6 +33,12 @@ export interface GenerateResult {
 export async function generateActions(providerId: string, dbArg?: Db, now: Date = new Date()): Promise<GenerateResult> {
   const db = dbArg ?? (await getDb());
   const config = await getRiskConfig(providerId, db);
+  const [company] = await db
+    .select({ segment: schema.providers.segment })
+    .from(schema.providers)
+    .where(eq(schema.providers.id, providerId))
+    .limit(1);
+  const seg = segmentOf(company?.segment);
 
   const active = await db
     .select({
@@ -92,12 +99,11 @@ export async function generateActions(providerId: string, dbArg?: Db, now: Date 
         kind: "region",
         causeGroup: "service",
         region,
-        title: `Concentração de falhas de conexão — ${region}`,
-        problem: `${affected.length} clientes da região ${region} (${Math.round(share)}% da base local) apresentam quedas, instabilidade ou lentidão recorrentes nos últimos ${config.recentDays} dias. ${criticalOrHigh} deles já estão em risco alto ou crítico.`,
-        recommendation:
-          "Verificar a infraestrutura que atende a região (CTO, rota óptica, equipamentos) e tratar a causa comum antes de abordar clientes individualmente. Depois da correção, avisar os clientes afetados e acompanhar se o risco diminui.",
+        title: seg.id === "provedor" ? `Concentração de falhas de conexão — ${region}` : `Concentração de ${seg.incidents} — ${region}`,
+        problem: `${affected.length} ${seg.customers} em ${region} (${Math.round(share)}% da base local) tiveram ${seg.incidents} recorrentes nos últimos ${config.recentDays} dias. ${criticalOrHigh} deles já estão em risco alto ou crítico.`,
+        recommendation: seg.regionAction,
         priority: criticalOrHigh >= 5 ? "critical" : "high",
-        ownerTeam: "Equipe técnica",
+        ownerTeam: seg.serviceTeam,
         dueAt: new Date(now.getTime() + 24 * HOUR),
         status: "pending",
         source: "auto",
@@ -136,7 +142,7 @@ export async function generateActions(providerId: string, dbArg?: Db, now: Date 
 
   for (const c of critical) {
     const band = c.riskBand as RiskBand;
-    const rec = recommendFor(c.riskTopGroup as SignalGroup | null, band);
+    const rec = recommendFor(c.riskTopGroup as SignalGroup | null, band, seg.id);
     const topFactors = (c.riskFactors ?? [])
       .slice(0, 3)
       .map((f) => f.label.toLowerCase())

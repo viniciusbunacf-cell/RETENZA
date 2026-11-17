@@ -11,6 +11,7 @@ const empty = (): CustomerSignals => ({
   tickets: [],
   events: [],
   invoices: [],
+  usage: [],
   retentionActionsCompletedAt: [],
 });
 
@@ -149,6 +150,49 @@ describe("computeRisk", () => {
     const c = empty();
     c.tickets = [ticket("cancel_request", daysAgo(2))];
     expect(computeRisk(c, NOW, config).score).toBe(0);
+  });
+});
+
+describe("uso e engajamento", () => {
+  const usoDiario = (deDias: number, ateDias: number, porDia: number) =>
+    Array.from({ length: deDias - ateDias + 1 }, (_, k) => ({ day: daysAgo(deDias - k), quantity: porDia }));
+
+  it("aponta queda de uso em relação à média anterior", () => {
+    const c = empty();
+    // 120 a 31 dias atrás: 1 visita por dia (média de 30 por mês); últimos 30 dias: 10 visitas.
+    c.usage = [...usoDiario(120, 31, 1), ...usoDiario(30, 1, 0), ...Array.from({ length: 10 }, (_, k) => ({ day: daysAgo(1 + k * 3), quantity: 1 }))];
+    const r = computeRisk(c, NOW, DEFAULT_RISK_CONFIG);
+    expect(r.factors.map((f) => f.rule)).toEqual(["usage_drop"]);
+    expect(r.factors[0].evidence).toMatch(/caiu 66%/);
+    expect(r.score).toBe(25);
+  });
+
+  it("aponta ausência de uso e não soma a queda junto", () => {
+    const c = empty();
+    c.usage = usoDiario(120, 25, 1);
+    const r = computeRisk(c, NOW, DEFAULT_RISK_CONFIG);
+    expect(r.factors.map((f) => f.rule)).toEqual(["no_usage"]);
+    expect(r.factors[0].evidence).toMatch(/há 25 dias/);
+    expect(r.groups.engagement.applied).toBe(30);
+  });
+
+  it("uso estável não gera sinal e cliente sem dado de uso não é penalizado", () => {
+    const c = empty();
+    c.usage = usoDiario(120, 1, 1);
+    expect(computeRisk(c, NOW, DEFAULT_RISK_CONFIG).score).toBe(0);
+    expect(computeRisk(empty(), NOW, DEFAULT_RISK_CONFIG).groups.engagement.applied).toBe(0);
+  });
+
+  it("queda de uso com insatisfação e falhas chega a risco crítico", () => {
+    const c = empty();
+    c.usage = usoDiario(120, 25, 1);
+    c.tickets = [ticket("cancel_request", daysAgo(5)), ticket("complaint", daysAgo(9), { csat: 1 })];
+    c.events = [
+      { type: "outage", startedAt: daysAgo(20), durationMinutes: 60 },
+      { type: "outage", startedAt: daysAgo(10), durationMinutes: 60 },
+    ];
+    const r = computeRisk(c, NOW, DEFAULT_RISK_CONFIG);
+    expect(r.band).toBe("critical");
   });
 });
 

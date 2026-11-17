@@ -12,6 +12,7 @@ const lead = {
   name: "Ana Souza",
   role: "Proprietária",
   company: "Fibra <Norte>",
+  segment: "provedor",
   city: "Serra Azul / MG",
   subscribers: "2.000 a 10.000",
   erp: "IXC Provedor",
@@ -34,7 +35,8 @@ describe("WhatsApp", () => {
   });
   it("monta o link com a mensagem pré-preenchida", () => {
     const text = buildWhatsappMessage(lead);
-    expect(text).toContain("Provedor: Fibra <Norte>");
+    expect(text).toContain("Empresa: Fibra <Norte>");
+    expect(text).toContain("Segmento: Provedores de internet");
     expect(text).not.toContain("undefined");
     expect(whatsappLink("5511912345678", "Olá & tudo bem?")).toBe(
       "https://wa.me/5511912345678?text=Ol%C3%A1%20%26%20tudo%20bem%3F",

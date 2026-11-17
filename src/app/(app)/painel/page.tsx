@@ -34,9 +34,11 @@ import { getRegionStats } from "@/lib/metrics/regions";
 import { listActions } from "@/lib/retention/queries";
 import { BAND_GUIDANCE, BAND_LABELS, BAND_ORDER } from "@/lib/risk/config";
 import type { RiskBand } from "@/lib/risk/types";
+import { cap, segmentOf } from "@/lib/segments";
 
 export default async function DashboardPage() {
   const user = await requireUser();
+  const seg = segmentOf(user.segment);
   const now = new Date();
   const overview = await getPortfolioOverview(user.providerId, now);
 
@@ -45,8 +47,8 @@ export default async function DashboardPage() {
       <>
         <PageHeader title="Dashboard executivo" description={`Bem-vindo ao RETENZA, ${user.name.split(" ")[0]}.`} />
         <EmptyState
-          title="Ainda não há dados do provedor"
-          description="Importe a base de assinantes e o histórico de chamados, eventos de rede, faturas e cancelamentos para o RETENZA começar a identificar clientes em risco. Se preferir conhecer a plataforma antes, carregue uma base fictícia."
+          title="Ainda não há dados da empresa"
+          description={`Importe a base de ${seg.customers} e o histórico de uso, chamados, ${seg.incidents}, faturas e cancelamentos para o RETENZA começar a identificar clientes em risco. Se preferir conhecer a plataforma antes, carregue uma base fictícia de provedor de internet.`}
           action={
             <>
               <Link href="/integracoes" className="btn-primary">
@@ -107,7 +109,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
-          label="Assinantes ativos"
+          label={`${cap(seg.customers)} ativos`}
           value={formatInt(overview.active)}
           hint={`${formatMoneyRound(overview.mrrCents)} de receita mensal`}
         />
@@ -136,12 +138,12 @@ export default async function DashboardPage() {
           href="/radar?faixa=prioritario"
         />
         <StatTile
-          label="Problemas técnicos recorrentes"
-          value={`${concentrated.length} ${concentrated.length === 1 ? "região" : "regiões"}`}
+          label="Falhas concentradas"
+          value={`${concentrated.length} ${concentrated.length === 1 ? seg.region : seg.regions}`}
           hint={
             concentrated.length
-              ? `${formatInt(concentrated.reduce((s, r) => s + r.affected, 0))} clientes afetados por falhas concentradas`
-              : "Nenhuma concentração regional de falhas"
+              ? `${formatInt(concentrated.reduce((s, r) => s + r.affected, 0))} ${seg.customers} afetados por ${seg.incidents} recorrentes`
+              : `Nenhuma concentração de ${seg.incidents}`
           }
           tone={concentrated.length ? "warning" : "default"}
           href="/regioes"
@@ -247,8 +249,8 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader
-            title="Regiões que pedem atenção"
-            description="Onde os problemas de conexão estão concentrados."
+            title={`${cap(seg.regions)} que pedem atenção`}
+            description={`Onde ${seg.incidents} e risco estão concentrados.`}
             right={
               <Link href="/regioes" className="link text-sm">
                 Ver todas
@@ -256,7 +258,7 @@ export default async function DashboardPage() {
             }
           />
           {regions.filter((r) => r.concentration || r.atRisk > 0).length === 0 ? (
-            <p className="px-5 py-10 text-center text-sm text-text-muted">Nenhuma região com concentração de risco.</p>
+            <p className="px-5 py-10 text-center text-sm text-text-muted">Nenhuma concentração de risco por {seg.region}.</p>
           ) : (
             <ul className="divide-y divide-line">
               {regions
@@ -279,7 +281,7 @@ export default async function DashboardPage() {
                           ) : null}
                         </p>
                         <p className="text-xs text-text-muted">
-                          {r.affected} de {r.customers} clientes com falhas recentes · {r.events30d} eventos de rede
+                          {r.affected} de {r.customers} {seg.customers} com falhas recentes · {r.events30d} {seg.incidents}
                         </p>
                       </div>
                       <div className="text-right">

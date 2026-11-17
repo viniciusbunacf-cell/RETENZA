@@ -9,11 +9,12 @@ import { canAdminister, canManage } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/session";
 import { formatDateTime, formatInt } from "@/lib/format";
 import { FIELD_SPECS, IMPORT_KINDS } from "@/lib/import/parse";
+import { segmentOf } from "@/lib/segments";
 import { ImportForm } from "./import-form";
 
 export const metadata: Metadata = { title: "Integrações" };
 
-const CONNECTORS = [
+const ISP_CONNECTORS = [
   {
     name: "HubSoft",
     status: "Próximo conector",
@@ -24,12 +25,24 @@ const CONNECTORS = [
   { name: "MK Solutions", status: "Em avaliação", text: "Será priorizado conforme a demanda dos provedores-piloto." },
 ];
 
+function connectorsFor(segment: string) {
+  const seg = segmentOf(segment);
+  if (seg.id === "provedor") return ISP_CONNECTORS;
+  return seg.systems.slice(0, 4).map((name) => ({
+    name,
+    status: "Em avaliação",
+    text: "Será priorizado conforme a demanda das empresas-piloto do segmento.",
+  }));
+}
+
 export default async function IntegrationsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const user = await requireUser();
+  const seg = segmentOf(user.segment);
+  const connectors = connectorsFor(user.segment);
   const welcome = (await searchParams).bemvindo === "1";
   const manage = canManage(user.role);
   const db = await getDb();
@@ -39,6 +52,7 @@ export default async function IntegrationsPage({
     cancelled: number;
     tickets: number;
     events: number;
+    usage: number;
     invoices: number;
   }>(
     await db.execute(sql`
@@ -46,6 +60,7 @@ export default async function IntegrationsPage({
              (select count(*) from customers where provider_id = ${user.providerId} and status = 'cancelled')::int as cancelled,
              (select count(*) from tickets where provider_id = ${user.providerId})::int as tickets,
              (select count(*) from network_events where provider_id = ${user.providerId})::int as events,
+             (select coalesce(sum(quantity), 0) from usage_records where provider_id = ${user.providerId})::int as usage,
              (select count(*) from invoices where provider_id = ${user.providerId})::int as invoices
     `),
   );
@@ -63,14 +78,14 @@ export default async function IntegrationsPage({
     <>
       <PageHeader
         title="Integrações"
-        description="O RETENZA se conecta aos sistemas que o provedor já usa. Nesta fase os dados entram por arquivos CSV exportados do ERP; os conectores diretos virão um de cada vez."
+        description="O RETENZA se conecta aos sistemas que a empresa já usa. Nesta fase os dados entram por arquivos CSV exportados do sistema de gestão ou de planilhas; os conectores diretos virão um de cada vez."
       />
 
       {welcome ? (
         <Notice className="mb-4">
           <strong className="font-semibold text-text">Conta criada.</strong> O próximo passo é importar a base de
-          clientes (incluindo quem cancelou nos últimos 6 a 12 meses) e, em seguida, chamados, eventos de rede e
-          faturas.
+          {seg.customers} (incluindo quem cancelou nos últimos 6 a 12 meses) e, em seguida, o que você tiver: uso do
+          serviço ({seg.usage}), chamados, falhas no serviço e faturas. Quanto mais fontes, mais precisa a leitura de risco.
         </Notice>
       ) : null}
 
@@ -83,12 +98,13 @@ export default async function IntegrationsPage({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {[
           ["Clientes", volumes?.customers],
           ["Cancelamentos", volumes?.cancelled],
           ["Chamados", volumes?.tickets],
-          ["Eventos de rede", volumes?.events],
+          ["Registros de uso", volumes?.usage],
+          ["Falhas no serviço", volumes?.events],
           ["Faturas", volumes?.invoices],
         ].map(([label, value]) => (
           <div key={label} className="card px-4 py-3">
@@ -135,7 +151,8 @@ export default async function IntegrationsPage({
         <Card className="mt-4 px-5 py-4">
           <p className="text-sm font-semibold text-text">Quer conhecer a plataforma antes de importar?</p>
           <p className="mt-0.5 mb-3 text-sm text-text-soft">
-            Carregue uma base fictícia de 1.800 assinantes com 12 meses de histórico. Você pode excluí-la depois em
+            Carregue uma base fictícia (um provedor de internet com 1.800 assinantes e 12 meses de histórico) para ver
+            o radar, as ações e os indicadores funcionando. Você pode excluí-la depois em
             Configurações.
           </p>
           <ActionButton action={loadDemoDataAction} pendingLabel="Carregando dados fictícios…">
@@ -190,9 +207,9 @@ export default async function IntegrationsPage({
         )}
       </Card>
 
-      <h2 className="mt-8 mb-3 text-base font-semibold text-text">Conectores de ERP</h2>
+      <h2 className="mt-8 mb-3 text-base font-semibold text-text">Conectores diretos</h2>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {CONNECTORS.map((c) => (
+        {connectors.map((c) => (
           <div key={c.name} className="card px-5 py-4">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold text-text">{c.name}</h3>
@@ -205,8 +222,9 @@ export default async function IntegrationsPage({
         ))}
       </div>
       <p className="mt-3 text-xs text-text-muted">
-        Os conectores ainda não estão implementados. O primeiro será desenvolvido para o ERP do provedor que participar
-        do piloto, sempre com credenciais de leitura e acesso mínimo necessário.
+        Os conectores ainda não estão implementados. Cada um será desenvolvido conforme o sistema das empresas que
+        participarem do piloto, sempre com credenciais de leitura e acesso mínimo necessário. Usa outro sistema
+        ou planilhas? Salve o arquivo em CSV (Excel e Google Planilhas fazem isso) e importe acima.
       </p>
     </>
   );

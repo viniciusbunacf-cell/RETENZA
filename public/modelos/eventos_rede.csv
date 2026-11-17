@@ -1,4 +1,0 @@
-id_evento;id_cliente;tipo;data_inicio;duracao_minutos
-EV-1;10001;queda;02/06/2026 08:50;140
-EV-2;10001;instabilidade;08/06/2026 19:30;45
-EV-3;10002;lentidao;11/05/2026 21:00;0

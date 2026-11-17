@@ -1,4 +1,4 @@
-id_cliente;nome;plano;mensalidade;status;data_ativacao;data_cancelamento;tipo_cancelamento;motivo_cancelamento;cidade;bairro;cto
-10001;Maria Exemplo da Silva;Fibra 400 Mega;99,90;ativo;15/03/2023;;;;Serra Azul;Centro;CTO-CEN-01
-10002;João Exemplo Pereira;Fibra 200 Mega;79,90;cancelado;02/08/2022;20/05/2026;voluntario;Problemas de conexão;Serra Azul;Vila Nova;CTO-VNO-02
-10003;Ana Exemplo Souza;Fibra 600 Mega;119,90;cancelado;11/01/2024;03/06/2026;involuntario;Inadimplência;Serra Azul;Boa Vista;CTO-BVT-01
+id_cliente;nome;plano;mensalidade;status;data_ativacao;data_cancelamento;tipo_cancelamento;motivo_cancelamento;cidade;regiao;subunidade
+10001;Maria Exemplo da Silva;Plano anual;99,90;ativo;15/03/2023;;;;Uberlândia;Centro;Unidade 1
+10002;João Exemplo Pereira;Plano mensal;79,90;cancelado;02/08/2022;20/05/2026;voluntario;Insatisfação com o atendimento;Uberlândia;Santa Mônica;Unidade 2
+10003;Ana Exemplo Souza;Plano trimestral;119,90;cancelado;11/01/2024;03/06/2026;involuntario;Inadimplência;Uberlândia;Centro;Unidade 1

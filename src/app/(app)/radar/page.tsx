@@ -16,6 +16,7 @@ import {
 import { requireUser } from "@/lib/auth/session";
 import { formatInt, formatMoney, formatTenure } from "@/lib/format";
 import { BAND_LABELS, GROUP_LABELS, GROUP_ORDER } from "@/lib/risk/config";
+import { cap, segmentOf } from "@/lib/segments";
 import type { RiskBand, SignalGroup } from "@/lib/risk/types";
 
 export const metadata: Metadata = { title: "Radar de risco" };
@@ -34,6 +35,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function RadarPage({ searchParams }: { searchParams: SearchParams }) {
   const user = await requireUser();
+  const seg = segmentOf(user.segment);
   const params = await searchParams;
   const one = (key: string) => {
     const v = params[key];
@@ -123,7 +125,7 @@ export default async function RadarPage({ searchParams }: { searchParams: Search
         <PageHeader title="Radar de risco" />
         <EmptyState
           title="Nenhum cliente ativo importado"
-          description="Importe a base de assinantes para o radar classificar o risco de cada cliente."
+          description={`Importe a base de ${seg.customers} para o radar classificar o risco de cada um.`}
           action={
             <Link href="/integracoes" className="btn-primary">
               Importar dados
@@ -138,7 +140,7 @@ export default async function RadarPage({ searchParams }: { searchParams: Search
     <>
       <PageHeader
         title="Radar de risco"
-        description="Cada cliente ativo é classificado pela combinação de sinais de rede, atendimento, financeiro e insatisfação. Clique em um cliente para ver os fatores e as evidências."
+        description={`Cada ${seg.customer} ativo é classificado pela combinação de sinais de uso, falhas no serviço, atendimento, financeiro e insatisfação. Clique em um nome para ver os fatores e as evidências.`}
       />
 
       <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar por faixa de risco">
@@ -176,8 +178,8 @@ export default async function RadarPage({ searchParams }: { searchParams: Search
             className="input pl-9"
           />
         </div>
-        <select name="regiao" defaultValue={region} aria-label="Região" className="input">
-          <option value="">Todas as regiões</option>
+        <select name="regiao" defaultValue={region} aria-label={cap(seg.region)} className="input">
+          <option value="">{`Todas: ${seg.regions}`}</option>
           {regionRows.map((r) => (
             <option key={r.region} value={r.region ?? ""}>
               {r.region}
@@ -204,7 +206,7 @@ export default async function RadarPage({ searchParams }: { searchParams: Search
               <tr>
                 <th className="th">Cliente</th>
                 <th className="th">Plano</th>
-                <th className="th">Região</th>
+                <th className="th">{cap(seg.region)}</th>
                 <th className="th">Relacionamento</th>
                 <th className="th w-44">Risco</th>
                 <th className="th">Principal fator</th>

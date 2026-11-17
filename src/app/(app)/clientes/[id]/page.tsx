@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { and, asc, desc, eq, gte } from "drizzle-orm";
-import { ArrowLeft, ClipboardList, CreditCard, Headset, Wifi } from "lucide-react";
+import { ArrowLeft, ClipboardList, CreditCard, Headset, TriangleAlert, Wifi } from "lucide-react";
 import { createCustomerActionAction } from "@/app/actions/retention";
 import { getDb, schema } from "@/db/client";
 import { ScoreLineChart } from "@/components/charts";
@@ -14,25 +14,21 @@ import { BAND_GUIDANCE, GROUP_LABELS, GROUP_ORDER } from "@/lib/risk/config";
 import { getRiskConfig } from "@/lib/risk/recalculate";
 import { recommendFor } from "@/lib/risk/recommend";
 import type { RiskBand, SignalGroup } from "@/lib/risk/types";
+import { segmentOf } from "@/lib/segments";
 
 export const metadata: Metadata = { title: "Cliente" };
 
 const DAY = 86_400_000;
 
 const TICKET_LABELS: Record<string, string> = {
-  technical: "Chamado técnico",
-  speed: "Reclamação de velocidade",
+  technical: "Chamado de suporte",
+  speed: "Reclamação de qualidade",
   financial: "Chamado financeiro",
   commercial: "Chamado comercial",
   complaint: "Reclamação",
   discount_request: "Pedido de desconto",
   cancel_request: "Intenção de cancelamento",
   other: "Atendimento",
-};
-const EVENT_LABELS: Record<string, string> = {
-  outage: "Queda de conexão",
-  instability: "Instabilidade",
-  slow_speed: "Lentidão medida",
 };
 
 interface TimelineItem {
@@ -46,6 +42,8 @@ interface TimelineItem {
 
 export default async function CustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
+  const seg = segmentOf(user.segment);
+  const EVENT_LABELS: Record<string, string> = seg.incidentTypes;
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
@@ -59,7 +57,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
 
   const now = new Date();
   const since = new Date(now.getTime() - 180 * DAY);
-  const [config, tickets, events, invoices, actionLinks, snapshots] = await Promise.all([
+  const [config, tickets, events, invoices, actionLinks, snapshots, usage] = await Promise.all([
     getRiskConfig(user.providerId, db),
     db
       .select()
@@ -95,13 +93,17 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
       .from(schema.riskSnapshots)
       .where(eq(schema.riskSnapshots.customerId, id))
       .orderBy(asc(schema.riskSnapshots.snapshotDate)),
+    db
+      .select({ day: schema.usageRecords.day, quantity: schema.usageRecords.quantity })
+      .from(schema.usageRecords)
+      .where(and(eq(schema.usageRecords.customerId, id), gte(schema.usageRecords.day, since.toISOString().slice(0, 10)))),
   ]);
 
   const band = (customer.riskBand ?? null) as RiskBand | null;
   const factors = customer.riskFactors ?? [];
   const notes = customer.riskNotes ?? [];
   const isActive = customer.status !== "cancelled";
-  const rec = recommendFor(customer.riskTopGroup as SignalGroup | null, band ?? "low");
+  const rec = recommendFor(customer.riskTopGroup as SignalGroup | null, band ?? "low", seg.id);
   const openAction = actionLinks.find((a) => ["pending", "in_progress"].includes(a.status));
   const openIndividual = actionLinks.find((a) => a.kind === "customer" && ["pending", "in_progress"].includes(a.status));
   const lastInteraction = tickets[0]?.openedAt ?? null;
@@ -129,7 +131,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
     timeline.push({
       at: e.startedAt,
       kind: "event",
-      title: EVENT_LABELS[e.type] ?? "Evento de rede",
+      title: EVENT_LABELS[e.type] ?? "Falha no serviço",
       detail: e.durationMinutes ? `Duração de ${e.durationMinutes} min` : "",
       alert: e.type !== "slow_speed",
     });
@@ -159,7 +161,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
   }
   timeline.sort((a, b) => b.at.getTime() - a.at.getTime());
 
-  const ICONS = { ticket: Headset, event: Wifi, invoice: CreditCard, action: ClipboardList };
+  const ICONS = { ticket: Headset, event: seg.id === "provedor" ? Wifi : TriangleAlert, invoice: CreditCard, action: ClipboardList };
   const recent = (d: Date) => d.getTime() >= now.getTime() - config.recentDays * DAY;
 
   return (
@@ -348,8 +350,8 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                 ["Plano", customer.planName ?? "—"],
                 ["Mensalidade", formatMoney(customer.monthlyFeeCents)],
                 ["Cliente desde", `${formatDate(customer.activatedAt)} (${formatTenure(customer.activatedAt, customer.cancelledAt ?? now)})`],
-                ["Região", customer.region ?? "—"],
-                ["CTO", customer.cto ?? "—"],
+                [seg.region.charAt(0).toUpperCase() + seg.region.slice(1), customer.region ?? "—"],
+                [seg.unit.charAt(0).toUpperCase() + seg.unit.slice(1), customer.cto ?? "—"],
                 ["Cidade", customer.city ?? "—"],
                 ["Última interação", lastInteraction ? formatDateTime(lastInteraction) : "Sem chamados em 180 dias"],
               ].map(([k, v]) => (
@@ -363,13 +365,14 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
 
           <Card>
             <CardHeader title={`Últimos ${config.recentDays} dias`} />
-            <div className="grid grid-cols-3 divide-x divide-line text-center">
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-b-xl border-t border-line bg-line text-center">
               {[
+                ["Uso registrado", usage.filter((u) => recent(new Date(u.day + "T12:00:00Z"))).reduce((s, u) => s + u.quantity, 0)],
                 ["Chamados", tickets.filter((t) => recent(t.openedAt)).length],
-                ["Falhas de rede", events.filter((e) => recent(e.startedAt)).length],
+                ["Falhas no serviço", events.filter((e) => recent(e.startedAt)).length],
                 ["Faturas em aberto", invoices.filter((i) => !i.paidAt && i.dueDate.getTime() < now.getTime()).length],
               ].map(([label, value]) => (
-                <div key={label} className="px-2 py-4">
+                <div key={label} className="bg-white px-2 py-4">
                   <p className="text-2xl font-semibold text-text tabular-nums">{value}</p>
                   <p className="text-xs text-text-muted">{label}</p>
                 </div>

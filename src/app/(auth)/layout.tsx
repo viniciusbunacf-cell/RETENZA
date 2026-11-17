@@ -4,7 +4,7 @@ import { NetworkGraphic } from "@/components/brand";
 import { Logo } from "@/components/ui";
 
 const PILLARS = [
-  { icon: Search, title: "Detectar", text: "Sinais combinados de risco em rede, atendimento e financeiro." },
+  { icon: Search, title: "Detectar", text: "Sinais combinados de risco em uso, falhas, atendimento e financeiro." },
   { icon: Activity, title: "Entender", text: "Fatores e evidências por trás de cada alerta, por cliente e por região." },
   { icon: ListChecks, title: "Reter", text: "Ações preventivas com responsável, prazo e resultado medido." },
 ];

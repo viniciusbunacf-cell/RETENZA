@@ -14,7 +14,7 @@ import { CreateUserForm, ResetRiskConfigButton, RiskConfigForm, WipeDataForm } f
 export const metadata: Metadata = { title: "Configurações" };
 
 const PRIVACY = [
-  ["Isolamento por provedor", "Cada consulta é filtrada pelo provedor da sessão; um usuário nunca acessa dados de outro provedor."],
+  ["Isolamento por empresa", "Cada consulta é filtrada pela empresa da sessão; um usuário nunca acessa dados de outra empresa."],
   ["Acesso por função", "Proprietário, gestor e atendente têm permissões diferentes para regras, importações e usuários."],
   ["Minimização de dados", "CPF/CNPJ, endereço completo e dados de pagamento não são importados nem armazenados."],
   ["Score explicável", "Todo score mostra as regras disparadas, as evidências e os pontos. Não há decisão automatizada sobre o cliente."],
@@ -78,14 +78,14 @@ export default async function SettingsPage() {
       <Card>
         <CardHeader
           title="Regras de classificação de risco"
-          description="Os pesos iniciais são um ponto de partida. Calibre-os com a taxa real de cancelamento do provedor, usando a validação do score em Indicadores."
+          description="Os pesos iniciais são um ponto de partida. Calibre-os com a taxa real de cancelamento da empresa, usando a validação do score em Indicadores."
           right={manage ? <ResetRiskConfigButton /> : null}
         />
         <div className="space-y-4 px-5 py-5">
           <Notice>
             O score soma os pontos das regras disparadas, respeitando o teto de cada grupo, e é limitado a 100. Com os
             tetos padrão, sinais financeiros isolados nunca passam de risco baixo, e o risco crítico exige a
-            convergência de pelo menos três grupos de sinais. Chamados técnicos ligados a uma falha de rede já
+            convergência de pelo menos três grupos de sinais. Chamados de suporte ligados a uma falha no serviço já
             registrada não são contados duas vezes.
           </Notice>
           {!manage ? <Notice tone="warning">Apenas proprietários e gestores podem alterar as regras.</Notice> : null}
@@ -171,9 +171,9 @@ export default async function SettingsPage() {
         </dl>
         {admin ? (
           <div className="border-t border-line px-5 py-5">
-            <h3 className="text-sm font-semibold text-text">Excluir dados do provedor</h3>
+            <h3 className="text-sm font-semibold text-text">Excluir dados da empresa</h3>
             <p className="mt-0.5 mb-3 max-w-2xl text-sm text-text-soft">
-              Remove definitivamente clientes, chamados, eventos de rede, faturas, scores e ações. Usuários, regras de
+              Remove definitivamente clientes, uso, chamados, falhas no serviço, faturas, scores e ações. Usuários, regras de
               risco e o registro de atividades são mantidos. Não é possível desfazer.
             </p>
             <WipeDataForm />

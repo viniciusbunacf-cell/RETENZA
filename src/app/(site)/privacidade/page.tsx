@@ -20,19 +20,19 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-xl font-semibold">Pedido de demonstração</h2>
           <p className="mt-2 text-text-soft">
-            Ao pedir uma demonstração, você informa nome, cargo, provedor, cidade, e-mail, WhatsApp, faixa de
-            assinantes, sistema de gestão e uma mensagem. Usamos esses dados apenas para responder ao pedido e
+            Ao pedir uma demonstração, você informa nome, cargo, empresa, segmento, cidade, e-mail, WhatsApp,
+            faixa de clientes, sistema de gestão e uma mensagem. Usamos esses dados apenas para responder ao pedido e
             conversar sobre a demonstração. Eles não são vendidos nem compartilhados com terceiros, exceto com os
             serviços que usamos para hospedar o site e enviar e-mails.
           </p>
         </section>
         <section>
-          <h2 className="text-xl font-semibold">Dados dos assinantes na plataforma</h2>
+          <h2 className="text-xl font-semibold">Dados dos clientes na plataforma</h2>
           <p className="mt-2 text-text-soft">
-            Na plataforma, o provedor é o controlador dos dados dos seus assinantes e o RETENZA atua como operador.
-            Os dados ficam isolados por provedor, o acesso aos sistemas do provedor é somente de leitura e não
-            importamos CPF, CNPJ, endereço completo ou dados de pagamento. O score de risco orienta a equipe do
-            provedor e não é usado para tomar decisões automáticas sobre o assinante.
+            Na plataforma, a empresa contratante é a controladora dos dados dos seus clientes e o RETENZA atua como
+            operador. Os dados ficam isolados por empresa, o acesso aos sistemas da empresa é somente de leitura e
+            não importamos CPF, CNPJ, endereço completo ou dados de pagamento. O score de risco orienta a equipe da
+            empresa e não é usado para tomar decisões automáticas sobre o cliente.
           </p>
         </section>
         <section>

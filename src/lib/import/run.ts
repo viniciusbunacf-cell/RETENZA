@@ -230,6 +230,35 @@ export async function runImport(
           });
       }
       rowsOk = values.length;
+    } else if (kind === "usage") {
+      // Soma por cliente e dia dentro do arquivo; na reimportação o valor do dia é substituído.
+      const days = new Map<string, { customerId: string; day: string; quantity: number }>();
+      parsed.rows.forEach((row, index) => {
+        const line = index + 2;
+        const customerId = resolve(row, line);
+        if (!customerId) return;
+        const when = parseDate(row.day);
+        if (!when) return fail(line, `data inválida ("${row.day ?? ""}").`);
+        const qty = (row.quantity ?? "").trim() === "" ? 1 : parseIntSafe(row.quantity);
+        if (qty === null || qty < 0) return fail(line, `quantidade inválida ("${row.quantity}").`);
+        // parseDate devolve o instante em UTC; o dia é o do horário de Brasília (UTC−3).
+        const day = new Date(when.getTime() - 3 * 3_600_000).toISOString().slice(0, 10);
+        const key = customerId + "|" + day;
+        const cur = days.get(key);
+        if (cur) cur.quantity += qty;
+        else days.set(key, { customerId, day, quantity: qty });
+        rowsOk += 1;
+      });
+      const values = [...days.values()].map((d) => ({ providerId, ...d }));
+      for (let i = 0; i < values.length; i += CHUNK) {
+        await db
+          .insert(schema.usageRecords)
+          .values(values.slice(i, i + CHUNK))
+          .onConflictDoUpdate({
+            target: [schema.usageRecords.customerId, schema.usageRecords.day],
+            set: { quantity: sql`excluded.quantity` },
+          });
+      }
     } else {
       const values: (typeof schema.invoices.$inferInsert)[] = [];
       parsed.rows.forEach((row, index) => {

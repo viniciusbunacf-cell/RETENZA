@@ -162,7 +162,7 @@ export async function createCustomerActionAction(formData: FormData): Promise<vo
   if (existing[0]) redirect(`/acoes/${existing[0].id}`);
 
   const band = (customer.riskBand ?? "low") as RiskBand;
-  const rec = recommendFor(customer.riskTopGroup as SignalGroup | null, band);
+  const rec = recommendFor(customer.riskTopGroup as SignalGroup | null, band, user.segment);
   const topFactors = (customer.riskFactors ?? [])
     .slice(0, 3)
     .map((f) => f.label.toLowerCase())

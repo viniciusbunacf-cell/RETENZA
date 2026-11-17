@@ -71,7 +71,7 @@ export function computeRisk(input: CustomerSignals, asOf: Date, config: RiskConf
   if (outages.length >= th("outages_recurring") && outages.length > 0) {
     add(
       "outages_recurring",
-      `${plural(outages.length, "queda/instabilidade", "quedas/instabilidades")} de conexão nos últimos ${config.recentDays} dias.`,
+      `${plural(outages.length, "interrupção ou problema recorrente", "interrupções ou problemas recorrentes")} no serviço nos últimos ${config.recentDays} dias.`,
     );
   }
   const downtime = outages.reduce((sum, e) => sum + (e.durationMinutes || 0), 0);
@@ -100,10 +100,39 @@ export function computeRisk(input: CustomerSignals, asOf: Date, config: RiskConf
   const slowCount = slowEvents.length + unlinkedSpeedTickets.length;
   if (slowCount >= th("slow_speed") && slowCount > 0) {
     const parts: string[] = [];
-    if (slowEvents.length) parts.push(plural(slowEvents.length, "medição de lentidão", "medições de lentidão"));
+    if (slowEvents.length) parts.push(plural(slowEvents.length, "registro de qualidade abaixo do esperado", "registros de qualidade abaixo do esperado"));
     if (unlinkedSpeedTickets.length)
-      parts.push(plural(unlinkedSpeedTickets.length, "reclamação de velocidade", "reclamações de velocidade"));
+      parts.push(plural(unlinkedSpeedTickets.length, "reclamação de qualidade", "reclamações de qualidade"));
     add("slow_speed", `${parts.join(" e ")} nos últimos ${config.recentDays} dias.`);
+  }
+
+  // ---------- Uso e engajamento ----------
+  // Compara o uso na janela recente com a média dos 90 dias anteriores a ela.
+  const usage = (input.usage ?? []).filter((u) => u.day.getTime() <= now);
+  if (usage.length > 0) {
+    const baseStart = recentStart - 90 * DAY;
+    let recentUse = 0;
+    let baseUse = 0;
+    let lastUse = 0;
+    for (const u of usage) {
+      const t = u.day.getTime();
+      if (u.quantity > 0 && t > lastUse) lastUse = t;
+      if (t > recentStart) recentUse += u.quantity;
+      else if (t > baseStart) baseUse += u.quantity;
+    }
+    const expected = (baseUse * config.recentDays) / 90;
+    const daysIdle = lastUse ? Math.floor((now - lastUse) / DAY) : null;
+    const usedBefore = baseUse > 0;
+    const fmtNum = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+    if (usedBefore && daysIdle !== null && daysIdle >= th("no_usage")) {
+      add("no_usage", `Nenhum uso registrado há ${daysIdle} dias; antes, a média era de ${fmtNum(expected)} a cada ${config.recentDays} dias.`);
+    } else if (expected >= 2 && recentUse <= expected * (1 - th("usage_drop") / 100)) {
+      const drop = Math.round((1 - recentUse / expected) * 100);
+      add(
+        "usage_drop",
+        `Uso caiu ${drop}% nos últimos ${config.recentDays} dias: ${fmtNum(recentUse)}, contra média de ${fmtNum(expected)} no período anterior.`,
+      );
+    }
   }
 
   // ---------- Atendimento ----------
@@ -118,13 +147,13 @@ export function computeRisk(input: CustomerSignals, asOf: Date, config: RiskConf
   });
   if (linkedCount > 0) {
     notes.push(
-      `${plural(linkedCount, "chamado técnico não foi somado", "chamados técnicos não foram somados")} em "Volume de chamados" por pertencer a falhas de rede já contabilizadas em "Qualidade do serviço".`,
+      `${plural(linkedCount, "chamado de suporte não foi somado", "chamados de suporte não foram somados")} em "Volume de chamados" por pertencer a falhas no serviço já contabilizadas em "Qualidade do serviço".`,
     );
   }
   if (countable.length >= th("tickets_volume") && countable.length > 0) {
     add(
       "tickets_volume",
-      `${plural(countable.length, "chamado aberto", "chamados abertos")} nos últimos ${config.recentDays} dias (além dos ligados a falhas de rede).`,
+      `${plural(countable.length, "chamado aberto", "chamados abertos")} nos últimos ${config.recentDays} dias (além dos ligados a falhas no serviço).`,
     );
   }
 
@@ -250,6 +279,8 @@ function groupLabel(group: SignalGroup): string {
   switch (group) {
     case "service":
       return "Qualidade do serviço";
+    case "engagement":
+      return "Uso e engajamento";
     case "support":
       return "Atendimento";
     case "financial":

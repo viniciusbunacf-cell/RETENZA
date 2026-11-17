@@ -108,7 +108,7 @@ export async function loadDemoData(providerId: string, now: Date = new Date()): 
     for (const h of history) {
       const id = crypto.randomUUID();
       const isRegion = h.kind === "region";
-      const rec = recommendFor(h.cause, "high");
+      const rec = recommendFor(h.cause, "high", "provedor");
       const ownerTeam = isRegion ? "Equipe técnica" : rec.ownerTeam;
       const member = memberFor(ownerTeam);
       const startedAt = new Date(h.createdAt.getTime() + 6 * HOUR);
@@ -261,7 +261,7 @@ async function createDemoProvider(): Promise<void> {
 
   const [provider] = await db
     .insert(schema.providers)
-    .values({ name: DEMO_PROVIDER_NAME, city: "Serra Azul", erp: "Importação CSV", isDemo: true })
+    .values({ name: DEMO_PROVIDER_NAME, segment: "provedor", city: "Serra Azul", erp: "Importação CSV", isDemo: true })
     .returning({ id: schema.providers.id });
   const passwordHash = await hashPassword(DEMO_PASSWORD);
   await db.insert(schema.users).values([

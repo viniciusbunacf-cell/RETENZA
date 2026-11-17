@@ -15,11 +15,18 @@ import type { RiskConfig, RiskFactor } from "@/lib/risk/types";
 
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: "date" });
 
-/** Provedor de internet (tenant). Todos os dados operacionais pertencem a um provedor. */
+/**
+ * Empresa cliente do RETENZA (tenant). Todos os dados operacionais pertencem a
+ * uma empresa. A tabela mantém o nome "providers" da primeira versão, feita
+ * para provedores de internet.
+ */
 export const providers = pgTable("providers", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
+  /** Segmento (src/lib/segments.ts): define termos e recomendações. */
+  segment: text("segment").notNull().default("provedor"),
   city: text("city"),
+  /** Sistema de gestão usado pela empresa. */
   erp: text("erp"),
   isDemo: boolean("is_demo").notNull().default(false),
   createdAt: ts("created_at").notNull().defaultNow(),
@@ -155,6 +162,28 @@ export const invoices = pgTable(
     uniqueIndex("invoices_provider_external_uq").on(t.providerId, t.externalId),
     index("invoices_customer_idx").on(t.customerId),
     index("invoices_provider_due_idx").on(t.providerId, t.dueDate),
+  ],
+);
+
+/**
+ * Uso do serviço por cliente e dia (visitas, aulas, acessos, consultas...).
+ * Alimenta o sinal de queda de uso; a reimportação substitui o valor do dia.
+ */
+export const usageRecords = pgTable(
+  "usage_records",
+  {
+    providerId: uuid("provider_id")
+      .notNull()
+      .references(() => providers.id, { onDelete: "cascade" }),
+    customerId: uuid("customer_id")
+      .notNull()
+      .references(() => customers.id, { onDelete: "cascade" }),
+    day: date("day", { mode: "string" }).notNull(),
+    quantity: integer("quantity").notNull().default(0),
+  },
+  (t) => [
+    primaryKey({ columns: [t.customerId, t.day] }),
+    index("usage_records_provider_day_idx").on(t.providerId, t.day),
   ],
 );
 
@@ -316,6 +345,7 @@ export const demoRequests = pgTable(
     name: text("name").notNull(),
     role: text("role"),
     company: text("company").notNull(),
+    segment: text("segment"),
     city: text("city"),
     subscribers: text("subscribers"),
     erp: text("erp"),

@@ -1,12 +1,12 @@
 import Papa from "papaparse";
 
-export type ImportKind = "customers" | "tickets" | "events" | "invoices";
+export type ImportKind = "customers" | "tickets" | "events" | "usage" | "invoices";
 
 export const IMPORT_KINDS: { kind: ImportKind; label: string; description: string; template: string }[] = [
   {
     kind: "customers",
     label: "Clientes e cancelamentos",
-    description: "Base de assinantes, incluindo os que cancelaram nos últimos 6 a 12 meses.",
+    description: "Base de clientes, incluindo os que cancelaram nos últimos 6 a 12 meses.",
     template: "/modelos/clientes.csv",
   },
   {
@@ -17,9 +17,15 @@ export const IMPORT_KINDS: { kind: ImportKind; label: string; description: strin
   },
   {
     kind: "events",
-    label: "Eventos de rede",
-    description: "Quedas, instabilidades e medições de lentidão por cliente.",
-    template: "/modelos/eventos_rede.csv",
+    label: "Falhas no serviço",
+    description: "Interrupções, problemas recorrentes e queda de qualidade que afetaram cada cliente.",
+    template: "/modelos/falhas.csv",
+  },
+  {
+    kind: "usage",
+    label: "Uso do serviço",
+    description: "Visitas, aulas, acessos, consultas ou pedidos de cada cliente. Alimenta o sinal de queda de uso.",
+    template: "/modelos/uso.csv",
   },
   {
     kind: "invoices",
@@ -39,8 +45,8 @@ export interface FieldSpec {
 
 export const FIELD_SPECS: Record<ImportKind, FieldSpec[]> = {
   customers: [
-    { field: "externalId", header: "id_cliente", required: true, description: "Código do cliente no ERP", aliases: ["id", "codigo", "codigo_cliente", "cliente_id", "id_assinante"] },
-    { field: "name", header: "nome", required: true, description: "Nome do assinante", aliases: ["cliente", "nome_cliente", "razao_social", "assinante"] },
+    { field: "externalId", header: "id_cliente", required: true, description: "Código do cliente no seu sistema", aliases: ["id", "codigo", "codigo_cliente", "cliente_id", "id_assinante", "id_aluno", "matricula", "id_paciente", "id_conta"] },
+    { field: "name", header: "nome", required: true, description: "Nome do cliente", aliases: ["cliente", "nome_cliente", "razao_social", "assinante", "aluno", "paciente", "nome_aluno", "nome_paciente", "conta"] },
     { field: "planName", header: "plano", required: false, description: "Plano contratado", aliases: ["nome_plano", "produto"] },
     { field: "monthlyFee", header: "mensalidade", required: false, description: "Valor mensal (ex.: 99,90)", aliases: ["valor", "valor_plano", "valor_mensal", "preco"] },
     { field: "status", header: "status", required: false, description: "ativo, suspenso ou cancelado", aliases: ["situacao", "status_contrato"] },
@@ -49,12 +55,12 @@ export const FIELD_SPECS: Record<ImportKind, FieldSpec[]> = {
     { field: "cancelType", header: "tipo_cancelamento", required: false, description: "voluntario ou involuntario (inadimplência)", aliases: ["tipo_churn"] },
     { field: "cancelReason", header: "motivo_cancelamento", required: false, description: "Motivo informado", aliases: ["motivo"] },
     { field: "city", header: "cidade", required: false, description: "Cidade", aliases: ["municipio"] },
-    { field: "region", header: "bairro", required: false, description: "Bairro ou região de atendimento", aliases: ["regiao", "zona", "area"] },
-    { field: "cto", header: "cto", required: false, description: "CTO / caixa de atendimento", aliases: ["caixa", "caixa_atendimento", "nap", "pop"] },
+    { field: "region", header: "regiao", required: false, description: "Região, bairro, unidade ou filial que atende o cliente", aliases: ["bairro", "unidade", "filial", "zona", "area", "polo", "loja"] },
+    { field: "cto", header: "subunidade", required: false, description: "Subdivisão da região: CTO, turma, modalidade, carteira, rota...", aliases: ["cto", "caixa", "caixa_atendimento", "nap", "pop", "turma", "modalidade", "especialidade", "carteira", "rota", "sala"] },
   ],
   tickets: [
     { field: "externalId", header: "id_chamado", required: true, description: "Número do chamado/protocolo", aliases: ["id", "protocolo", "numero", "codigo", "id_atendimento", "id_os"] },
-    { field: "customerExternalId", header: "id_cliente", required: true, description: "Código do cliente no ERP", aliases: ["codigo_cliente", "cliente_id", "id_assinante"] },
+    { field: "customerExternalId", header: "id_cliente", required: true, description: "Código do cliente no seu sistema", aliases: ["codigo_cliente", "cliente_id", "id_assinante", "id_aluno", "matricula", "id_paciente", "id_conta"] },
     { field: "category", header: "categoria", required: false, description: "Tipo do chamado (técnico, financeiro, reclamação, cancelamento...)", aliases: ["tipo", "assunto_tipo", "classificacao", "setor"] },
     { field: "subject", header: "assunto", required: false, description: "Assunto ou descrição curta", aliases: ["descricao", "titulo", "motivo"] },
     { field: "openedAt", header: "data_abertura", required: true, description: "Data e hora de abertura", aliases: ["abertura", "data", "criado_em", "data_criacao"] },
@@ -64,14 +70,19 @@ export const FIELD_SPECS: Record<ImportKind, FieldSpec[]> = {
   ],
   events: [
     { field: "externalId", header: "id_evento", required: false, description: "Identificador do evento (opcional)", aliases: ["id", "codigo"] },
-    { field: "customerExternalId", header: "id_cliente", required: true, description: "Código do cliente no ERP", aliases: ["codigo_cliente", "cliente_id", "id_assinante"] },
-    { field: "type", header: "tipo", required: true, description: "queda, instabilidade ou lentidao", aliases: ["evento", "tipo_evento"] },
+    { field: "customerExternalId", header: "id_cliente", required: true, description: "Código do cliente no seu sistema", aliases: ["codigo_cliente", "cliente_id", "id_assinante", "id_aluno", "matricula", "id_paciente", "id_conta"] },
+    { field: "type", header: "tipo", required: true, description: "interrupção (ou queda), recorrente (ou instabilidade) ou qualidade (ou lentidão)", aliases: ["evento", "tipo_evento", "tipo_falha", "ocorrencia"] },
     { field: "startedAt", header: "data_inicio", required: true, description: "Data e hora de início", aliases: ["inicio", "data", "data_evento"] },
-    { field: "durationMinutes", header: "duracao_minutos", required: false, description: "Duração em minutos", aliases: ["duracao", "minutos", "tempo_minutos"] },
+    { field: "durationMinutes", header: "duracao_minutos", required: false, description: "Duração em minutos", aliases: ["duracao", "duracao_min", "minutos", "tempo_minutos"] },
+  ],
+  usage: [
+    { field: "customerExternalId", header: "id_cliente", required: true, description: "Código do cliente no seu sistema", aliases: ["codigo_cliente", "cliente_id", "id_assinante", "id_aluno", "matricula", "id_paciente", "id_conta"] },
+    { field: "day", header: "data", required: true, description: "Dia do uso", aliases: ["dia", "data_uso", "data_acesso", "data_visita", "data_checkin", "data_check_in", "checkin", "check_in", "data_aula", "data_presenca", "data_login", "data_pedido", "data_consulta"] },
+    { field: "quantity", header: "quantidade", required: false, description: "Quantas vezes usou no dia (vazio = 1, uma linha por visita)", aliases: ["qtd", "visitas", "acessos", "aulas", "presencas", "consultas", "pedidos", "uso", "logins"] },
   ],
   invoices: [
     { field: "externalId", header: "id_fatura", required: true, description: "Número da fatura/boleto", aliases: ["id", "numero", "codigo", "id_boleto", "id_titulo"] },
-    { field: "customerExternalId", header: "id_cliente", required: true, description: "Código do cliente no ERP", aliases: ["codigo_cliente", "cliente_id", "id_assinante"] },
+    { field: "customerExternalId", header: "id_cliente", required: true, description: "Código do cliente no seu sistema", aliases: ["codigo_cliente", "cliente_id", "id_assinante", "id_aluno", "matricula", "id_paciente", "id_conta"] },
     { field: "dueDate", header: "vencimento", required: true, description: "Data de vencimento", aliases: ["data_vencimento"] },
     { field: "paidAt", header: "data_pagamento", required: false, description: "Data do pagamento (vazio = em aberto)", aliases: ["pagamento", "pago_em", "data_baixa"] },
     { field: "amount", header: "valor", required: false, description: "Valor da fatura", aliases: ["valor_fatura", "valor_total"] },
@@ -164,9 +175,9 @@ export function normalizeTicketCategory(category: string, subject = ""): string 
 
 export function normalizeEventType(value: string): string | null {
   const text = plain(value);
-  if (/lent|veloc|slow/.test(text)) return "slow_speed";
-  if (/instab|oscila|intermit|flap/.test(text)) return "instability";
-  if (/queda|caiu|indispon|outage|sem sinal|los|down|offline|rompimento/.test(text)) return "outage";
+  if (/instab|oscila|intermit|flap|recorrent|repetid|equipamento|remarca|troca/.test(text)) return "instability";
+  if (/lent|veloc|slow|qualidade|espera|lotac|atraso|demora|problema|defeito/.test(text)) return "slow_speed";
+  if (/queda|caiu|indispon|outage|sem sinal|los|down|offline|rompimento|interrup|falha|cancelad|fechad|nao realizad|fora do ar|erro/.test(text)) return "outage";
   return null;
 }
 

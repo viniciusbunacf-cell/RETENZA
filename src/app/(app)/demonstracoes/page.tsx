@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/format";
 import { isPlatformAdmin } from "@/lib/leads/admin";
 import { getContactChannels, normalizeWhatsapp } from "@/lib/leads/contact";
+import { segmentOf } from "@/lib/segments";
 
 export const metadata: Metadata = { title: "Pedidos de demonstração" };
 
@@ -63,7 +64,8 @@ export default async function DemoRequestsPage() {
                     <p className="text-sm text-text-soft">
                       {r.name}
                       {r.role ? ` · ${r.role}` : ""}
-                      {r.subscribers ? ` · ${r.subscribers} assinantes` : ""}
+                      {r.segment ? ` · ${segmentOf(r.segment).name}` : ""}
+                      {r.subscribers ? ` · ${r.subscribers} clientes` : ""}
                       {r.erp ? ` · ${r.erp}` : ""}
                     </p>
                   </div>

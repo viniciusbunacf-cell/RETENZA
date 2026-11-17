@@ -124,7 +124,7 @@ export async function wipeDataAction(_prev: FormState, formData: FormData): Prom
     await db.update(schema.providers).set({ isDemo: false }).where(eq(schema.providers.id, user.providerId));
     await audit(user, "Exclusão de dados", "Clientes, chamados, eventos, faturas, scores e ações removidos");
     revalidatePath("/", "layout");
-    return { ok: "Todos os dados operacionais do provedor foram excluídos." };
+    return { ok: "Todos os dados operacionais da empresa foram excluídos." };
   } catch (err) {
     const d = denied(err);
     if (d) return d;

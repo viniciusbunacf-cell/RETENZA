@@ -120,7 +120,7 @@ export function RiskConfigForm({ config, editable }: { config: RiskConfig; edita
                 <input type="number" name="recentDays" min={7} max={90} defaultValue={config.recentDays} className={numberInput} />
               </label>
               <label className="flex items-center justify-between gap-3 text-sm text-text-soft">
-                Chamado ligado à falha de rede (horas)
+                Chamado ligado a falha no serviço (horas)
                 <input
                   type="number"
                   name="incidentLinkHours"
@@ -210,7 +210,7 @@ export function CreateUserForm() {
           Equipe
         </label>
         <select id="new-team" name="team" defaultValue="Atendimento" className="input">
-          {["Atendimento", "Equipe técnica", "Retenção", "Financeiro", "Diretoria"].map((t) => (
+          {["Atendimento", "Relacionamento", "Retenção", "Operações", "Equipe técnica", "Financeiro", "Diretoria"].map((t) => (
             <option key={t} value={t}>
               {t}
             </option>

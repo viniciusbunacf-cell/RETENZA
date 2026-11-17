@@ -22,7 +22,7 @@ import { Logo, cn } from "./ui";
 const NAV = [
   { href: "/painel", label: "Dashboard", icon: LayoutDashboard },
   { href: "/radar", label: "Radar de risco", icon: Radar },
-  { href: "/regioes", label: "Inteligência geográfica", icon: MapPinned },
+  { href: "/regioes", label: "Concentração de falhas", icon: MapPinned },
   { href: "/acoes", label: "Central de ações", icon: ClipboardList },
   { href: "/indicadores", label: "Indicadores de retenção", icon: BarChart3 },
   { href: "/integracoes", label: "Integrações", icon: Plug },

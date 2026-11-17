@@ -1,3 +1,4 @@
+import { segmentOf } from "@/lib/segments";
 import type { RiskBand, SignalGroup } from "./types";
 
 export interface Recommendation {
@@ -12,16 +13,23 @@ export interface Recommendation {
  * Plano de ação sugerido conforme a causa predominante do risco.
  * A recomendação orienta a equipe; a decisão e a execução são sempre humanas.
  */
-export function recommendFor(topGroup: SignalGroup | null, band: RiskBand): Recommendation {
+export function recommendFor(topGroup: SignalGroup | null, band: RiskBand, segment?: string | null): Recommendation {
   const urgent = band === "critical";
+  const seg = segmentOf(segment);
   switch (topGroup) {
     case "service":
       return {
-        title: "Verificação técnica prioritária",
-        recommendation:
-          "Analisar o sinal e o histórico de quedas do cliente, agendar visita técnica se necessário e avisar o cliente sobre o que foi encontrado e corrigido.",
-        ownerTeam: "Equipe técnica",
+        title: seg.id === "provedor" ? "Verificação técnica prioritária" : "Correção prioritária do serviço",
+        recommendation: seg.serviceAction,
+        ownerTeam: seg.serviceTeam,
         slaHours: urgent ? 24 : 48,
+      };
+    case "engagement":
+      return {
+        title: "Contato de reengajamento",
+        recommendation: `Entrar em contato para entender por que ${seg.theCustomer} reduziu o uso, ajudar a retomar (orientação, ajuste de plano ou de horário) e registrar o motivo relatado.`,
+        ownerTeam: "Relacionamento",
+        slaHours: urgent ? 24 : 72,
       };
     case "support":
       return {

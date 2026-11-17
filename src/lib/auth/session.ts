@@ -20,6 +20,8 @@ export interface SessionUser {
   role: Role;
   team: string | null;
   providerName: string;
+  /** Segmento da empresa (src/lib/segments.ts). */
+  segment: string;
   providerIsDemo: boolean;
 }
 
@@ -95,6 +97,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
       team: schema.users.team,
       active: schema.users.active,
       providerName: schema.providers.name,
+      segment: schema.providers.segment,
       providerIsDemo: schema.providers.isDemo,
     })
     .from(schema.users)
@@ -110,6 +113,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     role: row.role as Role,
     team: row.team,
     providerName: row.providerName,
+    segment: row.segment,
     providerIsDemo: row.providerIsDemo,
   };
 });

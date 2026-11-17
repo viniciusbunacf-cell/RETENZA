@@ -4,9 +4,9 @@ import { useActionState } from "react";
 import { CircleCheck, MessageCircle } from "lucide-react";
 import { requestDemoAction, type DemoRequestState } from "@/app/actions/leads";
 import { SubmitButton } from "@/components/forms";
+import { SEGMENT_ORDER, SEGMENTS, type SegmentId } from "@/lib/segments";
 
-const SUBSCRIBERS = ["Até 2.000", "2.000 a 10.000", "10.000 a 30.000", "Mais de 30.000"];
-const ERPS = ["HubSoft", "IXC Provedor", "SGP", "MK Solutions", "Outro", "Não sei"];
+const CUSTOMERS = ["Até 500", "500 a 2.000", "2.000 a 10.000", "10.000 a 30.000", "Mais de 30.000"];
 
 function Field({
   id,
@@ -37,7 +37,7 @@ function Field({
   );
 }
 
-export function DemoForm() {
+export function DemoForm({ defaultSegment }: { defaultSegment?: SegmentId }) {
   const [state, action] = useActionState<DemoRequestState, FormData>(requestDemoAction, { status: "idle" });
   const errors = state.fieldErrors ?? {};
   const v = state.values ?? {};
@@ -84,8 +84,18 @@ export function DemoForm() {
       <Field id="role" label="Cargo" optional error={errors.role}>
         <input id="role" name="role" maxLength={80} autoComplete="organization-title" placeholder="Ex.: proprietário, gerente de atendimento" defaultValue={v.role} className="input" />
       </Field>
-      <Field id="company" label="Provedor" error={errors.company}>
+      <Field id="company" label="Empresa" error={errors.company}>
         <input id="company" name="company" required maxLength={120} autoComplete="organization" defaultValue={v.company} className="input" {...invalid("company")} />
+      </Field>
+      <Field id="segment" label="Segmento" error={errors.segment}>
+        <select id="segment" name="segment" required defaultValue={v.segment ?? defaultSegment ?? ""} className="input" {...invalid("segment")}>
+          <option value="">Selecione…</option>
+          {SEGMENT_ORDER.map((id) => (
+            <option key={id} value={id}>
+              {SEGMENTS[id].name}
+            </option>
+          ))}
+        </select>
       </Field>
       <Field id="city" label="Cidade e estado" optional error={errors.city}>
         <input id="city" name="city" maxLength={120} placeholder="Ex.: Uberlândia / MG" defaultValue={v.city} className="input" />
@@ -96,34 +106,27 @@ export function DemoForm() {
       <Field id="whatsapp" label="WhatsApp" error={errors.whatsapp}>
         <input id="whatsapp" name="whatsapp" type="tel" required inputMode="tel" autoComplete="tel" placeholder="(00) 00000-0000" defaultValue={v.whatsapp} className="input" {...invalid("whatsapp")} />
       </Field>
-      <Field id="subscribers" label="Assinantes ativos" optional>
+      <Field id="subscribers" label="Clientes ativos" optional>
         <select id="subscribers" name="subscribers" defaultValue={v.subscribers ?? ""} className="input">
           <option value="">Selecione…</option>
-          {SUBSCRIBERS.map((s) => (
+          {CUSTOMERS.map((s) => (
             <option key={s} value={s}>
               {s}
             </option>
           ))}
         </select>
       </Field>
-      <Field id="erp" label="Sistema de gestão (ERP)" optional>
-        <select id="erp" name="erp" defaultValue={v.erp ?? ""} className="input">
-          <option value="">Selecione…</option>
-          {ERPS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+      <Field id="erp" label="Sistema de gestão" optional>
+        <input id="erp" name="erp" maxLength={60} placeholder="Ex.: o sistema que você usa, ou planilhas" defaultValue={v.erp} className="input" />
       </Field>
       <div className="sm:col-span-2">
         <Field id="message" label="O que você quer resolver?" optional error={errors.message}>
-          <textarea id="message" name="message" rows={3} maxLength={1500} placeholder="Ex.: muitos cancelamentos por instabilidade em um bairro" defaultValue={v.message} className="input" />
+          <textarea id="message" name="message" rows={3} maxLength={1500} placeholder="Ex.: clientes somem sem avisar; muitos cancelamentos em uma unidade" defaultValue={v.message} className="input" />
         </Field>
       </div>
       <div className="sm:col-span-2">
         <label className="flex items-start gap-2.5 text-sm text-text-soft">
-          <input type="checkbox" name="consent" required className="mt-0.5 h-4 w-4 shrink-0 accent-brand" {...invalid("consent")} />
+          <input type="checkbox" name="consent" required defaultChecked={v.consent === "on"} className="mt-0.5 h-4 w-4 shrink-0 accent-brand" {...invalid("consent")} />
           <span>
             Concordo que o RETENZA use estes dados para entrar em contato sobre a demonstração, conforme a{" "}
             <a href="/privacidade" target="_blank" className="link">

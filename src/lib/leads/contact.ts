@@ -6,10 +6,14 @@
  * continua gravando os pedidos no banco.
  */
 
+import { isSegmentId, SEGMENTS } from "@/lib/segments";
+
 export interface DemoLead {
   name: string;
   role?: string | null;
   company: string;
+  /** Id do segmento (src/lib/segments.ts). */
+  segment?: string | null;
   city?: string | null;
   subscribers?: string | null;
   erp?: string | null;
@@ -61,9 +65,10 @@ function leadLines(lead: DemoLead): string[] {
   return [
     line("Nome", lead.name),
     line("Cargo", lead.role),
-    line("Provedor", lead.company),
+    line("Empresa", lead.company),
+    line("Segmento", lead.segment && isSegmentId(lead.segment) ? SEGMENTS[lead.segment].name : lead.segment),
     line("Cidade", lead.city),
-    line("Assinantes", lead.subscribers),
+    line("Clientes ativos", lead.subscribers),
     line("Sistema de gestão", lead.erp),
     line("E-mail", lead.email),
     line("WhatsApp", lead.whatsapp),

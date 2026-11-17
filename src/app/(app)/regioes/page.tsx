@@ -7,20 +7,22 @@ import { requireUser } from "@/lib/auth/session";
 import { formatInt, formatMoneyRound, formatPct } from "@/lib/format";
 import { UNKNOWN_REGION, getRegionStats } from "@/lib/metrics/regions";
 import { getRiskConfig } from "@/lib/risk/recalculate";
+import { cap, segmentOf } from "@/lib/segments";
 
 export const metadata: Metadata = { title: "Inteligência geográfica" };
 
 export default async function RegionsPage() {
   const user = await requireUser();
+  const seg = segmentOf(user.segment);
   const [regions, config] = await Promise.all([getRegionStats(user.providerId), getRiskConfig(user.providerId)]);
 
   if (regions.length === 0) {
     return (
       <>
-        <PageHeader title="Inteligência geográfica" />
+        <PageHeader title={`Concentração por ${seg.region}`} />
         <EmptyState
           title="Sem dados de localização"
-          description="Importe a base de clientes com a coluna de bairro (e CTO, se disponível) para identificar concentrações de risco por região."
+          description={`Importe a base de ${seg.customers} com a coluna regiao (${seg.region}) e, se houver, subunidade (${seg.unit}) para identificar concentrações de risco.`}
           action={
             <Link href="/integracoes" className="btn-primary">
               Importar dados
@@ -39,32 +41,32 @@ export default async function RegionsPage() {
   return (
     <>
       <PageHeader
-        title="Inteligência geográfica"
-        description="Quando vários clientes da mesma região apresentam falhas, o problema costuma ser operacional — e não de relacionamento individual. O RETENZA agrupa essas ocorrências para que a causa comum seja tratada."
+        title={`Concentração por ${seg.region}`}
+        description={`Quando vários ${seg.customers} do mesmo grupo (${seg.region}) apresentam ${seg.incidents}, o problema costuma ser operacional — e não de relacionamento individual. O RETENZA agrupa essas ocorrências para que a causa comum seja tratada.`}
       />
 
       {onlyUnknown ? (
         <Notice tone="warning" className="mb-4">
-          Os clientes importados não têm bairro/região informado. Inclua a coluna <code>bairro</code> no arquivo de
-          clientes para habilitar a análise geográfica.
+          Os clientes importados não têm {seg.region} informado. Inclua a coluna <code>regiao</code> no arquivo de
+          clientes para habilitar esta análise.
         </Notice>
       ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatTile
-          label="Regiões com concentração de falhas"
+          label={`${cap(seg.regions)} com concentração de falhas`}
           value={concentrated.length}
           hint={`Critério: ao menos ${config.cluster.minCustomers} clientes e ${config.cluster.minSharePct}% da base local com falhas em ${config.recentDays} dias`}
           tone={concentrated.length ? "critical" : "default"}
         />
         <StatTile
-          label="Clientes afetados nessas regiões"
+          label={`${cap(seg.customers)} afetados`}
           value={formatInt(affectedInClusters)}
-          hint="Com quedas, instabilidade ou lentidão recorrentes"
+          hint={`Com ${seg.incidents} recorrentes`}
           tone={concentrated.length ? "warning" : "default"}
         />
         <StatTile
-          label="Receita mensal em risco nessas regiões"
+          label="Receita mensal em risco nesses grupos"
           value={formatMoneyRound(mrrInClusters)}
           hint="Clientes em risco alto ou crítico"
           tone={concentrated.length ? "warning" : "default"}
@@ -76,11 +78,11 @@ export default async function RegionsPage() {
           <table className="w-full min-w-[820px] border-collapse">
             <thead className="border-b border-line bg-page/60">
               <tr>
-                <th className="th">Região</th>
+                <th className="th">{cap(seg.region)}</th>
                 <th className="th text-right">Clientes</th>
                 <th className="th text-right">Com falhas recentes</th>
-                <th className="th text-right">Eventos</th>
-                <th className="th text-right">Chamados téc.</th>
+                <th className="th text-right">Falhas</th>
+                <th className="th text-right">Chamados de suporte</th>
                 <th className="th text-right">Risco alto/crítico</th>
                 <th className="th">Score médio (12 semanas)</th>
               </tr>
@@ -127,7 +129,7 @@ export default async function RegionsPage() {
                       </span>
                       <Sparkline
                         values={r.trend.map((t) => t.avgScore)}
-                        label={`Evolução do score médio da região ${r.region}`}
+                        label={`Evolução do score médio: ${r.region}`}
                       />
                     </div>
                   </td>
@@ -138,8 +140,8 @@ export default async function RegionsPage() {
         </div>
       </Card>
       <p className="mt-3 text-xs text-text-muted">
-        Eventos e chamados consideram os últimos {config.recentDays} dias. A linha fica vermelha quando o score médio da
-        região está em alta nas últimas 12 semanas.
+        Falhas e chamados consideram os últimos {config.recentDays} dias. A linha fica vermelha quando o score médio do
+        grupo está em alta nas últimas 12 semanas.
       </p>
     </>
   );

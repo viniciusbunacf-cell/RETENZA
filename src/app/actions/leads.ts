@@ -12,6 +12,7 @@ import {
   whatsappLink,
   type DemoLead,
 } from "@/lib/leads/contact";
+import { isSegmentId } from "@/lib/segments";
 
 export interface DemoRequestState {
   status: "idle" | "error" | "ok";
@@ -32,7 +33,8 @@ const optional = (max: number) =>
 const leadSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome.").max(120),
   role: optional(80),
-  company: z.string().trim().min(2, "Informe o nome do provedor.").max(120),
+  company: z.string().trim().min(2, "Informe o nome da empresa.").max(120),
+  segment: z.string().refine(isSegmentId, "Selecione o segmento."),
   city: optional(120),
   subscribers: optional(40),
   erp: optional(60),
@@ -55,15 +57,16 @@ function tooMany(ip: string): boolean {
   return list.length > 5;
 }
 
-const FIELDS = ["name", "role", "company", "city", "subscribers", "erp", "email", "whatsapp", "message"] as const;
+const FIELDS = ["name", "role", "company", "segment", "city", "subscribers", "erp", "email", "whatsapp", "message"] as const;
 
 export async function requestDemoAction(_prev: DemoRequestState, formData: FormData): Promise<DemoRequestState> {
-  const values = Object.fromEntries(FIELDS.map((f) => [f, String(formData.get(f) ?? "")]));
+  const values: Record<string, string> = Object.fromEntries(FIELDS.map((f) => [f, String(formData.get(f) ?? "")]));
+  values.consent = String(formData.get("consent") ?? "");
 
   // Campo invisível: preenchido apenas por robôs.
   if (String(formData.get("site") ?? "") !== "") return { status: "ok", whatsappUrl: null };
 
-  const parsed = leadSchema.safeParse({ ...values, consent: formData.get("consent") ?? "" });
+  const parsed = leadSchema.safeParse(values);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
@@ -84,6 +87,7 @@ export async function requestDemoAction(_prev: DemoRequestState, formData: FormD
     name: data.name,
     role: data.role,
     company: data.company,
+    segment: data.segment,
     city: data.city,
     subscribers: data.subscribers,
     erp: data.erp,
