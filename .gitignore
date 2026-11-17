@@ -43,3 +43,6 @@ next-env.d.ts
 
 # banco embarcado e segredo de sessão locais (modo demonstração)
 /.data/
+
+# cache do Python
+__pycache__/
